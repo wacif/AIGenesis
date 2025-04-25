@@ -1,139 +1,132 @@
-The prototype will focus on **real-time route optimization**, **GreenSync Mode**, and **blockchain-based rewards**, with a polished demo that showcases the OpenAI Agents SDK’s power in a logistics context. I’ll keep the implementation Python-based, as requested, and ensure the blockchain technology is top-tier to impress judges.
-
----
-
-### Hackathon Prototype: EcoSync Logistics Agent (Python, OpenAI Agents SDK)
+### Hackathon Prototype: EcoSync Logistics Agent (Python, OpenAI Agents SDK, No Blockchain)
 
 #### 1. Prototype Scope
-To balance ease and competitiveness within a 1-3 day hackathon timeline, the prototype includes:
-- **Three Agents** (using OpenAI Agents SDK):
-  - **Routing Agent**: Optimizes shipment routes, balancing cost, time, and emissions (GreenSync Mode).
-  - **Collaboration Agent**: Generates an emotion-aware dashboard and notifications for stakeholders.
-  - **Reward Agent**: Issues blockchain-based tokens for eco-friendly actions.
+To balance ease and competitiveness, the prototype includes:
+- **Four Agents** (using OpenAI Agents SDK):
+  - **Routing Agent**: Optimizes routes in real-time, incorporating **Real-Time Routing Optimization** and **Exception Management** for traffic/weather disruptions.
+  - **Collaboration Agent**: Generates an emotion-aware dashboard with **Sustainability Storytelling**, adapting to user stress.
+  - **Reward Agent**: Tracks eco-friendly points in-memory, tied to **GreenSync Mode**.
+  - **Forecasting Agent**: Implements **Dynamic Demand Forecasting** to predict stock needs, influencing routing decisions.
 - **Key Features**:
-  - **Real-Time Route Optimization**: Reroutes shipments using mock traffic/weather data, powered by the SDK’s tool-calling.
-  - **GreenSync Mode**: Prioritizes low-emission routes and calculates carbon savings.
-  - **Emotion-Aware Dashboard**: Adapts UI based on simulated user stress (e.g., concise visuals during “crises”).
-  - **Blockchain Rewards**: Simulates token issuance for green routes on a high-performance blockchain.
-  - **3D Route Visualization**: Uses Plotly for AR-like route visuals in a web interface.
+  - **Real-Time Route Optimization**: Reroutes shipments using mock traffic/weather data, with exception handling for delays.
+  - **GreenSync Mode**: Prioritizes low-emission routes, calculates carbon savings.
+  - **Dynamic Demand Forecasting**: Updates stock predictions based on mock sales/weather data.
+  - **Emotion-Aware Dashboard**: Adapts UI for high-stress users, includes storytelling (e.g., “This route saved 10 trees!”).
+  - **Reward System**: Assigns points for green routes, displayed on a leaderboard.
+  - **3D Route Visualization**: Uses Plotly for AR-like visuals.
+  - **Disruption Simulator**: Button to trigger mock disruptions (e.g., traffic jam).
 - **Demo Scenario**:
-  - Simulate a shipment from Warehouse A to Customer B, disrupted by a mock traffic jam.
-  - Show the Routing Agent rerouting in GreenSync Mode, the Collaboration Agent updating the dashboard, and the Reward Agent issuing tokens.
-  - Display 3D visuals and metrics (e.g., “15% CO2 saved”).
+  - Simulate a shipment from Warehouse A to Customer B, with a mock sales spike (from Forecasting Agent) and traffic jam (Exception Management).
+  - Show the Routing Agent rerouting in GreenSync Mode, Collaboration Agent updating the dashboard with storytelling, and Reward Agent assigning points.
+  - Display 3D visuals, leaderboard, and metrics (e.g., “15% CO2 saved, 5 points earned”).
+
+**Notes on Suggested Features**:
+- **Autonomous Procurement Agents**: Excluded from the prototype due to hackathon time constraints (requires complex supplier negotiation logic). Mentioned in the presentation as a future feature.
+- **Smart Warehouses**: Simplified to inventory insights from the Forecasting Agent, as robot coordination is too complex for a 1-3 day build. Future scope noted in presentation.
 
 #### 2. Why It Wins
-- **Innovation**: Leverages the OpenAI Agents SDK (released March 2025,) for autonomous, tool-using agents, combined with a high-performance blockchain.[](https://openai.github.io/openai-agents-python/)
-- **Impact**: Addresses logistics inefficiencies and emissions (e.g., 15% CO2 reduction in demo).
-- **Wow Factor**: 3D visuals, gamified rewards, and emotion-aware UI captivate judges.
+- **Innovation**: Combines OpenAI Agents SDK for autonomous routing, forecasting, and exception handling, a cutting-edge logistics application.
+- **Impact**: Reduces costs/emissions (e.g., 15% CO2 savings in demo) and improves resilience.
+- **Wow Factor**: 3D visuals, storytelling, leaderboard, and disruption simulator captivate judges.
 - **Ease**: Mock data and Python (Flask, Plotly) ensure a fast build.
-- **Polish**: A sleek dashboard and clear metrics (cost, emissions, tokens) ensure professionalism.
+- **Polish**: Sleek dashboard with metrics (cost, emissions, points) and multimedia storytelling (aligning with your interest).
 
 #### 3. Mock Data Strategy
-Mock data, stored as JSON, simplifies development:
+Mock data (JSON) simplifies development:
 - **Supply Chain**:
   - 5 suppliers, 3 warehouses, 10 routes (graph nodes/edges).
   - Mock IoT: GPS coordinates, shipment statuses.
 - **External Data**:
   - Mock traffic: Delays on Route 1.
   - Mock weather: Storm on Route 2.
-  - Mock X posts: “Traffic jam on Route 1” for sentiment.
+  - Mock X posts: “Traffic jam on Route 1.”
+- **Demand Data**:
+  - Mock sales: Daily units sold per product.
+  - Mock weather: Temperature affecting demand (e.g., cold weather boosts heater sales).
 - **Sustainability**:
   - Emissions: 0.5 kg CO2/km per route.
   - Supplier ESG scores: 80/100 for green suppliers.
 - **Human Inputs**:
   - Mock feedback: “Urgent delivery needed.”
   - Mock stress: “High” during disruption.
+- **Rewards**:
+  - Mock points: 1 point per 2 kg CO2 saved, stored in-memory.
+  - Mock leaderboard: Top 5 drivers by points.
 
 #### 4. Agentic AI with OpenAI Agents SDK
-The OpenAI Agents SDK (,) is a lightweight, Python-based framework for multi-agent workflows, supporting:[](https://openai.github.io/openai-agents-python/)[](https://github.com/openai/openai-agents-python)
+The OpenAI Agents SDK enables multi-agent workflows with:
 - **Agents**: LLMs with instructions and tools.
-- **Handoffs**: Delegating tasks between agents.
-- **Tools**: Python functions for actions (e.g., route optimization).
-- **Tracing**: Built-in debugging via OpenAI Dashboard.
+- **Handoffs**: Task delegation between agents.
+- **Tools**: Python functions for actions (e.g., routing, forecasting).
+- **Tracing**: Debugging via OpenAI Dashboard.
 
-We’ll use the SDK with GPT-4o (via OpenAI’s Responses API,) to create autonomous agents, avoiding complex integrations like Azure OpenAI () for hackathon simplicity.[](https://techcrunch.com/2025/03/11/openai-launches-new-tools-to-help-businesses-build-ai-agents/)[](https://techcommunity.microsoft.com/blog/azure-ai-services-blog/use-azure-openai-and-apim-with-the-openai-agents-sdk/4392537)
+We’ll use GPT-4o for reasoning, keeping it lightweight.
 
 ##### Agentic Framework
-- **Multi-Agent System**: Three agents (Routing, Collaboration, Reward) coordinated via the SDK’s `Runner`.
-- **Autonomy**: Agents use tools and make decisions independently.
-- **Adaptability**: SDK’s handoffs enable dynamic responses to disruptions.
-- **Collaboration**: Collaboration Agent aligns outputs with human needs using NLP.
+- **Multi-Agent System**: Four agents (Routing, Collaboration, Reward, Forecasting) coordinated via SDK’s `Runner`.
+- **Autonomy**: Agents process inputs and act independently.
+- **Adaptability**: Handoffs handle disruptions and demand changes.
+- **Collaboration**: Collaboration Agent aligns outputs with human needs.
 - **Transparency**: SDK tracing and GPT-4o explanations ensure XAI.
 
 ##### Agent Details
 1. **Routing Agent**:
-   - **Perception**: Reads mock routes/traffic/weather via a Python tool.
-   - **Reasoning**: Uses GPT-4o to optimize routes, prompted with instructions: “Optimize for emissions in GreenSync Mode.”
-   - **Action**: Outputs route ID and carbon savings, using SDK’s structured outputs (Pydantic).
-   - **SDK Role**: Tool-calling for route scoring, handoff to Collaboration Agent.
+   - **Perception**: Reads mock routes/traffic/weather via tools.
+   - **Reasoning**: Optimizes routes for emissions (GreenSync Mode), handles exceptions (e.g., delays), using GPT-4o.
+   - **Action**: Outputs route ID, carbon savings, and exception alerts.
+   - **SDK Role**: Tool-calling for routing, handoff to Collaboration/Forecasting.
 
 2. **Collaboration Agent**:
-   - **Perception**: Reads mock user inputs/stress via a tool.
-   - **Reasoning**: Uses GPT-4o for emotion-aware NLP, adapting dashboard content.
-   - **Action**: Generates dashboard text/visuals, using SDK’s output_type.
-   - **SDK Role**: Processes handoffs from Routing Agent, outputs structured data.
+   - **Perception**: Reads mock user inputs/stress and route data.
+   - **Reasoning**: Generates emotion-aware dashboard with storytelling (e.g., “Saved 10 trees!”).
+   - **Action**: Outputs text, visuals, and leaderboard data.
+   - **SDK Role**: Processes handoffs, outputs structured data.
 
 3. **Reward Agent**:
-   - **Perception**: Monitors Routing Agent’s green routes.
-   - **Reasoning**: Calculates tokens (1 per 2 kg CO2 saved) via GPT-4o.
-   - **Action**: Simulates blockchain transaction, using SDK’s tool-calling.
-   - **SDK Role**: Handles token logic, handoffs to dashboard.
+   - **Perception**: Monitors green routes.
+   - **Reasoning**: Calculates points (1 per 2 kg CO2 saved).
+   - **Action**: Updates in-memory leaderboard.
+   - **SDK Role**: Handles reward logic, handoffs to dashboard.
+
+4. **Forecasting Agent**:
+   - **Perception**: Reads mock sales/weather data.
+   - **Reasoning**: Predicts stock needs, influences routing priorities.
+   - **Action**: Outputs demand forecasts.
+   - **SDK Role**: Tool-calling for forecasting, handoff to Routing.
 
 ##### SDK Integration
-- **Setup**: `pip install openai-agents` ().[](https://github.com/openai/openai-agents-python)
-- **Tools**: Python functions for route optimization, user input processing, and blockchain simulation.
-- **Handoffs**: Routing → Collaboration → Reward for seamless workflow.
-- **Tracing**: Use OpenAI Dashboard to debug agent runs ().[](https://openai.github.io/openai-agents-python/quickstart/)
-- **API Key**: Store in `.env` (OPENAI_API_KEY).
+- **Setup**: `pip install openai-agents`.
+- **Tools**: Functions for routing, user inputs, forecasting, and rewards.
+- **Handoffs**: Forecasting → Routing → Collaboration → Reward.
+- **Tracing**: OpenAI Dashboard for debugging.
+- **API Key**: Store in `.env`.
 
-#### 5. Blockchain Technology
-Instead of Polygon, we’ll use **Solana** for blockchain rewards, as it’s a high-performance, low-cost alternative with hackathon appeal:
-- **Why Solana**:
-  - **Performance**: Processes 65,000 transactions/second vs. Polygon’s 7,000, ideal for real-time rewards (https://solana.com).
-  - **Low Fees**: ~$0.00025 per transaction vs. Polygon’s ~$0.01, cost-effective for micro-rewards.
-  - **Ecosystem**: Growing adoption in DeFi and NFTs, appealing to judges for market relevance.
-  - **Hackathon Fit**: Solana’s Python SDK (`solana-py`) simplifies integration, and its testnet (devnet) supports mock transactions.
-- **Implementation**:
-  - Deploy an ERC-20-like token contract using Solana’s SPL Token program.
-  - Use `solana-py` to simulate token transfers for eco-friendly routes.
-  - Log transactions on Solana devnet for demo transparency.
-- **Presentation Talking Points**:
-  - “We chose Solana for its blazing-fast transactions and near-zero fees, enabling scalable, real-time rewards for sustainable logistics.”
-  - “Solana’s eco-friendly consensus (Proof of History) aligns with EcoSync’s GreenSync Mode, reducing blockchain emissions.”
-  - Demo a mock transaction: “Driver earns 5 tokens for saving 10 kg CO2, logged on Solana’s devnet.”
-
-**Alternatives Considered**:
-- **Aptos**: High throughput (160,000 TPS), but less mature ecosystem and complex SDK (https://aptoslabs.com).
-- **Sui**: Scalable with low latency, but limited Python support (https://sui.io).
-- **Polygon**: Reliable but slower and costlier than Solana, less “cutting-edge” for 2025.
-- **Rationale**: Solana balances performance, ease, and hype, making it a standout choice for hackathon judges and future scalability.
-
-#### 6. Technical Implementation
+#### 5. Technical Implementation
 ##### Tech Stack
-- **Backend**: Python with Flask for API, `openai-agents` for AI, `solana-py` for blockchain.
-- **Frontend**: Flask templates with Plotly for 3D visuals.
-- **Blockchain**: Solana devnet, SPL Token for rewards.
-- **Data**: JSON files for mock data.
+- **Backend**: Python, Flask, `openai-agents`.
+- **Frontend**: Flask templates, Plotly for 3D visuals.
+- **Data**: JSON for mock data.
 - **AI**: OpenAI Agents SDK with GPT-4o.
+- **Rewards**: In-memory dictionary.
 
 ##### Prototype Structure
 ```
 /ecosync-prototype
-├── /app                # Flask app and agent logic
+├── /app
 │   ├── __init__.py
 │   ├── routes.py
 │   ├── agents/
 │   │   ├── routing.py
 │   │   ├── collaboration.py
 │   │   ├── reward.py
-├── /data              # Mock JSON data
+│   │   ├── forecasting.py
+├── /data
 │   ├── routes.json
 │   ├── traffic.json
 │   ├── weather.json
 │   ├── user.json
-├── /blockchain        # Solana contract and scripts
-│   ├── token.py
-├── /templates         # Flask HTML templates
+│   ├── sales.json
+├── /templates
 │   ├── dashboard.html
 ├── requirements.txt
 ├── run.py
@@ -163,6 +156,24 @@ Instead of Polygon, we’ll use **Solana** for blockchain rewards, as it’s a h
 ]
 ```
 
+##### Mock Data (data/sales.json)
+```json
+[
+  {
+    "product": "Heater",
+    "date": "2025-04-26",
+    "units_sold": 100,
+    "weather": "cold"
+  },
+  {
+    "product": "Heater",
+    "date": "2025-04-27",
+    "units_sold": 120,
+    "weather": "cold"
+  }
+]
+```
+
 ##### Key Code Snippets
 1. **Main App (app/routes.py)**:
    ```python
@@ -170,26 +181,40 @@ Instead of Polygon, we’ll use **Solana** for blockchain rewards, as it’s a h
    from app.agents.routing import routing_agent
    from app.agents.collaboration import collaboration_agent
    from app.agents.reward import reward_agent
+   from app.agents.forecasting import forecasting_agent
    from agents import Runner
+   import json
 
    app = Flask(__name__)
 
+   @app.route('/api/forecast', methods=['GET'])
+   async def forecast():
+       result = await Runner.run(forecasting_agent, input="Predict stock needs")
+       return jsonify(result.final_output.dict())
+
    @app.route('/api/optimize', methods=['GET'])
    async def optimize():
-       result = await Runner.run(routing_agent, input="Optimize route in GreenSync Mode")
-       return jsonify(result.final_output)
+       forecast = (await Runner.run(forecasting_agent, input="Predict stock needs")).final_output
+       result = await Runner.run(routing_agent, input=f"Optimize route in GreenSync Mode with forecast: {forecast.dict()}")
+       return jsonify(result.final_output.dict())
 
    @app.route('/api/dashboard', methods=['GET'])
    async def dashboard():
        route = (await Runner.run(routing_agent, input="Optimize route in GreenSync Mode")).final_output
-       result = await Runner.run(collaboration_agent, input=f"Generate dashboard for route: {route}, stress: high")
-       return jsonify(result.final_output)
+       result = await Runner.run(collaboration_agent, input=f"Generate dashboard for route: {route.dict()}, stress: high")
+       return jsonify(result.final_output.dict())
 
    @app.route('/api/reward', methods=['GET'])
    async def reward():
        route = (await Runner.run(routing_agent, input="Optimize route in GreenSync Mode")).final_output
-       result = await Runner.run(reward_agent, input=f"Issue tokens for route: {route}")
-       return jsonify(result.final_output)
+       result = await Runner.run(reward_agent, input=f"Issue points for route: {route.dict()}")
+       return jsonify(result.final_output.dict())
+
+   @app.route('/api/disrupt', methods=['POST'])
+   def disrupt():
+       with open('data/traffic.json', 'w') as f:
+           json.dump({"route_id": 1, "delay_min": 30}, f)
+       return jsonify({"status": "Traffic jam added"})
 
    @app.route('/')
    def index():
@@ -212,10 +237,18 @@ Instead of Polygon, we’ll use **Solana** for blockchain rewards, as it’s a h
        with open('data/routes.json', 'r') as f:
            return json.load(f)
 
+   @function_tool
+   def get_traffic():
+       try:
+           with open('data/traffic.json', 'r') as f:
+               return json.load(f)
+       except FileNotFoundError:
+           return {}
+
    routing_agent = Agent(
        name="RoutingAgent",
-       instructions="Optimize routes for emissions in GreenSync Mode. Use get_routes tool.",
-       tools=[get_routes],
+       instructions="Optimize routes for emissions in GreenSync Mode, handle traffic delays. Use get_routes and get_traffic tools.",
+       tools=[get_routes, get_traffic],
        output_type=RouteOutput
    )
    ```
@@ -228,17 +261,25 @@ Instead of Polygon, we’ll use **Solana** for blockchain rewards, as it’s a h
 
    class DashboardOutput(BaseModel):
        text: str
-       tokens: int
+       story: str
+       points: int
 
    @function_tool
    def get_user():
        with open('data/user.json', 'r') as f:
            return json.load(f)
 
+   @function_tool
+   def get_leaderboard():
+       return [
+           {"driver": "Alice", "points": 50},
+           {"driver": "Bob", "points": 40}
+       ]
+
    collaboration_agent = Agent(
        name="CollaborationAgent",
-       instructions="Generate dashboard text for high-stress users. Use get_user tool.",
-       tools=[get_user],
+       instructions="Generate dashboard text and sustainability story (e.g., 'Saved 10 trees') for high-stress users. Include leaderboard. Use get_user and get_leaderboard tools.",
+       tools=[get_user, get_leaderboard],
        output_type=DashboardOutput
    )
    ```
@@ -247,29 +288,53 @@ Instead of Polygon, we’ll use **Solana** for blockchain rewards, as it’s a h
    ```python
    from agents import Agent, function_tool
    from pydantic import BaseModel
-   from solana.rpc.api import Client
-   from solana.keypair import Keypair
 
    class RewardOutput(BaseModel):
-       tokens: int
-       transaction: str
+       points: int
+       message: str
 
    @function_tool
-   def issue_token(emissions_kg: float):
-       tokens = int(emissions_kg / 2)
-       client = Client("https://api.devnet.solana.com")
-       # Simulate token transfer (mock for hackathon)
-       return {"tokens": tokens, "tx": "mock_tx_id"}
+   def issue_points(emissions_kg: float):
+       points = int(emissions_kg / 2)
+       return {"points": points, "message": f"Earned {points} points for saving {emissions_kg} kg CO2"}
 
    reward_agent = Agent(
        name="RewardAgent",
-       instructions="Issue tokens for emissions saved (1 token per 2 kg). Use issue_token tool.",
-       tools=[issue_token],
+       instructions="Issue points for emissions saved (1 point per 2 kg). Use issue_points tool.",
+       tools=[issue_points],
        output_type=RewardOutput
    )
    ```
 
-5. **Dashboard Template (templates/dashboard.html)**:
+5. **Forecasting Agent (app/agents/forecasting.py)**:
+   ```python
+   from agents import Agent, function_tool
+   from pydantic import BaseModel
+   import json
+
+   class ForecastOutput(BaseModel):
+       product: str
+       units_needed: int
+       explanation: str
+
+   @function_tool
+   def get_sales():
+       with open('data/sales.json', 'r') as f:
+           return json.load(f)
+
+   @function_tool
+   def get_weather():
+       return {"date": "2025-04-27", "condition": "cold"}
+
+   forecasting_agent = Agent(
+       name="ForecastingAgent",
+       instructions="Predict stock needs based on sales and weather. Use get_sales and get_weather tools.",
+       tools=[get_sales, get_weather],
+       output_type=ForecastOutput
+   )
+   ```
+
+6. **Dashboard Template (templates/dashboard.html)**:
    ```html
    <!DOCTYPE html>
    <html>
@@ -280,138 +345,129 @@ Instead of Polygon, we’ll use **Solana** for blockchain rewards, as it’s a h
    </head>
    <body class="bg-gray-100 p-4">
        <h1 class="text-2xl font-bold">EcoSync Dashboard</h1>
+       <button id="disrupt" class="bg-red-500 text-white px-4 py-2 rounded">Simulate Traffic Jam</button>
        <div id="dashboard-text" class="my-4"></div>
+       <div id="story" class="my-4 text-green-600"></div>
        <div id="route-visual" class="w-full h-64"></div>
        <p id="carbon-saved"></p>
-       <p id="tokens-earned"></p>
+       <p id="points-earned"></p>
+       <div id="leaderboard" class="my-4">
+           <h2 class="text-xl">Leaderboard</h2>
+           <ul id="leaderboard-list"></ul>
+       </div>
 
        <script>
-           fetch('/api/optimize').then(res => res.json()).then(route => {
-               fetch('/api/dashboard').then(res => res.json()).then(dashboard => {
-                   fetch('/api/reward').then(res => res.json()).then(reward => {
-                       document.getElementById('dashboard-text').innerText = dashboard.text || 'Loading...';
-                       document.getElementById('carbon-saved').innerText = `Carbon Saved: ${route.emissions_kg || 0} kg`;
-                       document.getElementById('tokens-earned').innerText = `Tokens Earned: ${reward.tokens || 0}`;
+           function updateDashboard() {
+               fetch('/api/forecast').then(res => res.json()).then(forecast => {
+                   fetch('/api/optimize').then(res => res.json()).then(route => {
+                       fetch('/api/dashboard').then(res => res.json()).then(dashboard => {
+                           fetch('/api/reward').then(res => res.json()).then(reward => {
+                               document.getElementById('dashboard-text').innerText = dashboard.text || 'Loading...';
+                               document.getElementById('story').innerText = dashboard.story || '';
+                               document.getElementById('carbon-saved').innerText = `Carbon Saved: ${route.emissions_kg || 0} kg`;
+                               document.getElementById('points-earned').innerText = `Points Earned: ${reward.points || 0}`;
+                               document.getElementById('leaderboard-list').innerHTML = dashboard.leaderboard?.map(d => `<li>${d.driver}: ${d.points}</li>`).join('') || '';
 
-                       // 3D route visualization
-                       const trace = {
-                           x: [0, 100], y: [0, 50], z: [0, 10],
-                           type: 'scatter3d',
-                           mode: 'lines+markers',
-                           marker: { size: 5, color: 'green' }
-                       };
-                       Plotly.newPlot('route-visual', [trace], {
-                           scene: { xaxis: { title: 'X' }, yaxis: { title: 'Y' }, zaxis: { title: 'Z' } }
+                               // 3D route visualization
+                               const trace = {
+                                   x: [0, 100], y: [0, 50], z: [0, 10],
+                                   type: 'scatter3d',
+                                   mode: 'lines+markers',
+                                   marker: { size: 5, color: 'green' }
+                               };
+                               Plotly.newPlot('route-visual', [trace], {
+                                   scene: { xaxis: { title: 'X' }, yaxis: { title: 'Y' }, zaxis: { title: 'Z' } }
+                               });
+                           });
                        });
                    });
                });
+           }
+           updateDashboard();
+           document.getElementById('disrupt').addEventListener('click', () => {
+               fetch('/api/disrupt', { method: 'POST' }).then(updateDashboard);
            });
        </script>
    </body>
    </html>
    ```
 
-6. **Solana Token Script (blockchain/token.py)**:
-   ```python
-   from solana.rpc.api import Client
-   from solana.keypair import Keypair
-   from spl.token.client import Token
-
-   def create_token():
-       client = Client("https://api.devnet.solana.com")
-       payer = Keypair.generate()
-       # Mock token creation for hackathon
-       return {"address": "mock_token_address"}
-
-   if __name__ == "__main__":
-       print(create_token())
-   ```
-
 7. **Requirements (requirements.txt)**:
    ```
    flask==2.0.1
    openai-agents==0.1.0
-   solana==0.30.0
    plotly==5.10.0
+   pydantic==1.10.7
    ```
 
 ##### Development Timeline (1-3 Days)
 - **Day 1**:
   - Set up Flask, mock JSON data, and OpenAI Agents SDK.
-  - Implement Routing Agent with route optimization.
+  - Implement Routing and Forecasting Agents.
   - Create basic dashboard with Plotly.
 - **Day 2**:
   - Build Collaboration and Reward Agents.
-  - Integrate Solana devnet for mock transactions.
-  - Test route optimization and visuals.
+  - Add disruption simulator and leaderboard.
+  - Test routing, forecasting, and visuals.
 - **Day 3**:
-  - Polish dashboard with Tailwind CSS.
-  - Simulate demo scenario (rerouting, rewards).
+  - Polish dashboard with storytelling and Tailwind CSS.
+  - Simulate demo scenario (rerouting, points).
   - Prepare presentation.
 
-#### 7. Additional Functionalities
-To make the prototype stand out, add these features (prioritized for impact and feasibility):
-1. **Dynamic Disruption Simulator**:
-   - **What**: A dashboard button to trigger mock disruptions (e.g., “Add traffic jam to Route 1”).
-   - **Why**: Interactive demos score high with judges, showcasing agent adaptability.
-   - **How**: Modify routes.json dynamically via a Flask endpoint; use SDK’s handoffs to reroute.
-   - **Effort**: 2 hours.
-   - **Impact**: High (engages judges).
-2. **Sustainability Storytelling**:
-   - **What**: GPT-4o generates narratives (e.g., “This route saved 10 trees!”) for the dashboard.
-   - **Why**: Emotional impact and multimedia appeal (aligns with your interest in multimedia from April 17, 2025 conversation).
-   - **How**: Add a tool to Collaboration Agent for narrative generation.
-   - **Effort**: 1 hour.
-   - **Impact**: Medium (adds polish).
-3. **GreenSync Leaderboard**:
-   - **What**: Display a mock leaderboard of drivers by carbon savings.
-   - **Why**: Gamification boosts engagement and market appeal.
-   - **How**: Store mock driver data in JSON; render in dashboard.
-   - **Effort**: 2 hours.
-   - **Impact**: High (shows scalability).
-4. **Predictive Delay Alerts**:
+#### 6. Additional Functionalities (Refined)
+Incorporating your suggestions, here are the prioritized features (beyond those included):
+1. **Predictive Delay Alerts**:
    - **What**: Routing Agent predicts delays using mock X post sentiment (e.g., “Traffic reported”).
-   - **Why**: Demonstrates real-world relevance and SDK’s NLP capabilities.
+   - **Why**: Enhances Exception Management, shows SDK’s NLP power.
    - **How**: Add a tool to parse mock X posts; integrate with Routing Agent.
    - **Effort**: 3 hours.
-   - **Impact**: Medium (adds depth).
-5. **Healthcare Logistics Teaser**:
+   - **Impact**: Medium.
+2. **Voice Input Mock**:
+   - **What**: Simulate voice commands (e.g., “Show green routes”) via text inputs.
+   - **Why**: Adds interactivity, mimics Grok 3’s voice mode.
+   - **How**: Add form input to dashboard; process with Collaboration Agent.
+   - **Effort**: 3 hours.
+   - **Impact**: Medium.
+3. **Healthcare Logistics Teaser**:
    - **What**: Mock a vaccine delivery scenario in the presentation.
-   - **Why**: Shows cross-industry potential, appealing to investors.
-   - **How**: Add a slide and mock JSON for vaccine routes.
+   - **Why**: Shows cross-industry potential.
+   - **How**: Add slide and mock JSON for vaccine routes.
    - **Effort**: 1 hour.
-   - **Impact**: High (broadens market).
+   - **Impact**: High.
 
-#### 8. Presentation Strategy
+**Excluded Suggestions (for Presentation)**:
+- **Autonomous Procurement Agents**: “Future scope: AI agents will negotiate supplier contracts autonomously, optimizing for price and ESG scores.”
+- **Smart Warehouses**: “Future vision: Coordinate warehouse robots for picking and audits, integrated with EcoSync’s forecasting.”
+
+#### 7. Presentation Strategy
 - **Demo Flow**:
-  - Pitch (30 seconds): “EcoSync uses OpenAI’s Agents SDK and Solana to optimize logistics, saving costs and emissions.”
-  - Simulate a traffic jam; show rerouting, dashboard updates, and token rewards.
-  - Highlight 3D visuals and metrics (e.g., “15% CO2 saved”).
-  - Trigger a disruption via button for interactivity.
+  - Pitch (30 seconds): “EcoSync leverages OpenAI’s Agents SDK to optimize logistics, forecasting demand, and saving emissions with autonomous AI.”
+  - Simulate a sales spike and traffic jam; show rerouting, dashboard with storytelling, and leaderboard.
+  - Click disruption button to highlight Exception Management.
+  - Show metrics: “15% CO2 saved, 5 points earned.”
 - **Slides**:
-  - **Problem**: Logistics inefficiencies, high emissions.
-  - **Solution**: Agentic AI with OpenAI SDK, Solana rewards.
-  - **Tech**: Python, Flask, Plotly, Solana, OpenAI Agents SDK.
-  - **Demo**: Live rerouting and rewards.
+  - **Problem**: Logistics inefficiencies, emissions, disruptions.
+  - **Solution**: Agentic AI with forecasting, routing, and collaboration.
+  - **Tech**: Python, Flask, Plotly, OpenAI Agents SDK.
+  - **Demo**: Live rerouting, storytelling, leaderboard.
   - **Impact**: 20% cost reduction, 15% CO2 savings (simulated).
-  - **Future**: Healthcare, retail, global scalability.
+  - **Future**: Procurement agents, smart warehouses, blockchain (e.g., Solana).
 - **Judges’ Questions**:
-  - **Tech**: “OpenAI Agents SDK for autonomous workflows, Solana for fast, low-cost rewards.”
-  - **Scalability**: “Integrates with SAP, Oracle; Solana scales to millions of transactions.”
-  - **Impact**: “Simulated 15% emission reduction, gamified incentives for adoption.”
+  - **Tech**: “OpenAI Agents SDK enables autonomous routing and forecasting with tool-calling.”
+  - **Scalability**: “Extensible to SAP, Oracle, and blockchain like Solana.”
+  - **Impact**: “15% emission reduction, gamified points drive adoption.”
 
-#### 9. Why Solana in Presentation
-- **Highlight**: “Solana’s 65,000 TPS and $0.00025 fees enable real-time, scalable rewards, unlike Polygon’s slower, costlier network.”
-- **Sustainability**: “Solana’s Proof of History uses less energy, aligning with EcoSync’s green mission.”
-- **Demo**: Show a mock transaction in the dashboard: “Driver earns 5 tokens, logged on Solana devnet.”
-- **Future**: “Solana’s DeFi ecosystem supports enterprise adoption, like Stripe’s integration with OpenAI agents ().”[](https://venturebeat.com/ai/openais-strategic-gambit-the-agent-sdk-and-why-it-changes-everything-for-enterprise-ai/)
+#### 8. Blockchain in Presentation
+- **Mention**: “EcoSync is ready for blockchain integration with Solana, offering 65,000 TPS and $0.00025 fees for scalable, transparent rewards.”
+- **Why**: Shows vision without hackathon complexity.
+- **Slide**: “Future Vision: Solana for eco-friendly rewards, aligning with ESG goals.”
 
 ---
 
 ```python
 ```python
 # EcoSync Logistics Agent Prototype
-# Hackathon demo with mock data, OpenAI Agents SDK, and Solana
+# Hackathon demo with mock data, OpenAI Agents SDK, no blockchain
 # Directory: /ecosync-prototype
 
 # app/__init__.py
@@ -425,26 +481,40 @@ from flask import Flask, render_template, jsonify
 from app.agents.routing import routing_agent
 from app.agents.collaboration import collaboration_agent
 from app.agents.reward import reward_agent
+from app.agents.forecasting import forecasting_agent
 from agents import Runner
+import json
 
 app = Flask(__name__)
 
+@app.route('/api/forecast', methods=['GET'])
+async def forecast():
+    result = await Runner.run(forecasting_agent, input="Predict stock needs")
+    return jsonify(result.final_output.dict())
+
 @app.route('/api/optimize', methods=['GET'])
 async def optimize():
-    result = await Runner.run(routing_agent, input="Optimize route in GreenSync Mode")
-    return jsonify(result.final_output)
+    forecast = (await Runner.run(forecasting_agent, input="Predict stock needs")).final_output
+    result = await Runner.run(routing_agent, input=f"Optimize route in GreenSync Mode with forecast: {forecast.dict()}")
+    return jsonify(result.final_output.dict())
 
 @app.route('/api/dashboard', methods=['GET'])
 async def dashboard():
     route = (await Runner.run(routing_agent, input="Optimize route in GreenSync Mode")).final_output
-    result = await Runner.run(collaboration_agent, input=f"Generate dashboard for route: {route}, stress: high")
-    return jsonify(result.final_output)
+    result = await Runner.run(collaboration_agent, input=f"Generate dashboard for route: {route.dict()}, stress: high")
+    return jsonify(result.final_output.dict())
 
 @app.route('/api/reward', methods=['GET'])
 async def reward():
     route = (await Runner.run(routing_agent, input="Optimize route in GreenSync Mode")).final_output
-    result = await Runner.run(reward_agent, input=f"Issue tokens for route: {route}")
-    return jsonify(result.final_output)
+    result = await Runner.run(reward_agent, input=f"Issue points for route: {route.dict()}")
+    return jsonify(result.final_output.dict())
+
+@app.route('/api/disrupt', methods=['POST'])
+def disrupt():
+    with open('data/traffic.json', 'w') as f:
+        json.dump({"route_id": 1, "delay_min": 30}, f)
+    return jsonify({"status": "Traffic jam added"})
 
 @app.route('/')
 def index():
@@ -465,10 +535,18 @@ def get_routes():
     with open('data/routes.json', 'r') as f:
         return json.load(f)
 
+@function_tool
+def get_traffic():
+    try:
+        with open('data/traffic.json', 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
 routing_agent = Agent(
     name="RoutingAgent",
-    instructions="Optimize routes for emissions in GreenSync Mode. Use get_routes tool.",
-    tools=[get_routes],
+    instructions="Optimize routes for emissions in GreenSync Mode, handle traffic delays. Use get_routes and get_traffic tools.",
+    tools=[get_routes, get_traffic],
     output_type=RouteOutput
 )
 
@@ -479,42 +557,73 @@ import json
 
 class DashboardOutput(BaseModel):
     text: str
-    tokens: int
+    story: str
+    points: int
+    leaderboard: list
 
 @function_tool
 def get_user():
     with open('data/user.json', 'r') as f:
         return json.load(f)
 
+@function_tool
+def get_leaderboard():
+    return [
+        {"driver": "Alice", "points": 50},
+        {"driver": "Bob", "points": 40}
+    ]
+
 collaboration_agent = Agent(
     name="CollaborationAgent",
-    instructions="Generate dashboard text for high-stress users. Use get_user tool.",
-    tools=[get_user],
+    instructions="Generate dashboard text and sustainability story (e.g., 'Saved 10 trees') for high-stress users. Include leaderboard. Use get_user and get_leaderboard tools.",
+    tools=[get_user, get_leaderboard],
     output_type=DashboardOutput
 )
 
 # app/agents/reward.py
 from agents import Agent, function_tool
 from pydantic import BaseModel
-from solana.rpc.api import Client
-from solana.keypair import Keypair
 
 class RewardOutput(BaseModel):
-    tokens: int
-    transaction: str
+    points: int
+    message: str
 
 @function_tool
-def issue_token(emissions_kg: float):
-    tokens = int(emissions_kg / 2)
-    client = Client("https://api.devnet.solana.com")
-    # Simulate token transfer (mock for hackathon)
-    return {"tokens": tokens, "tx": "mock_tx_id"}
+def issue_points(emissions_kg: float):
+    points = int(emissions_kg / 2)
+    return {"points": points, "message": f"Earned {points} points for saving {emissions_kg} kg CO2"}
 
 reward_agent = Agent(
     name="RewardAgent",
-    instructions="Issue tokens for emissions saved (1 token per 2 kg). Use issue_token tool.",
-    tools=[issue_token],
+    instructions="Issue points for emissions saved (1 point per 2 kg). Use issue_points tool.",
+    tools=[issue_points],
     output_type=RewardOutput
+)
+
+# app/agents/forecasting.py
+from agents import Agent, function_tool
+from pydantic import BaseModel
+import json
+
+class ForecastOutput(BaseModel):
+    product: str
+    units_needed: int
+    explanation: str
+
+@function_tool
+def get_sales():
+    with open('data/sales.json', 'r') as f:
+        return json.load(f)
+
+@function_tool
+def get_weather():
+    return {"date": "2025-04-27", "condition": "cold"}
+
+forecasting_agent = Agent(
+    name="ForecastingAgent",
+    instructions="Predict stock needs based on sales and weather. Use get_sales and get_weather tools.",
+    tools=[get_sales, get_weather],
+    output_type=ForecastOutput
 )
 
 # run.py
@@ -552,6 +661,28 @@ if __name__ == '__main__':
   "feedback": "urgent delivery needed"
 }
 
+# data/traffic.json
+{
+  "route_id": 1,
+  "delay_min": 0
+}
+
+# data/sales.json
+[
+  {
+    "product": "Heater",
+    "date": "2025-04-26",
+    "units_sold": 100,
+    "weather": "cold"
+  },
+  {
+    "product": "Heater",
+    "date": "2025-04-27",
+    "units_sold": 120,
+    "weather": "cold"
+  }
+]
+
 # templates/dashboard.html
 <!DOCTYPE html>
 <html>
@@ -562,55 +693,57 @@ if __name__ == '__main__':
 </head>
 <body class="bg-gray-100 p-4">
     <h1 class="text-2xl font-bold">EcoSync Dashboard</h1>
+    <button id="disrupt" class="bg-red-500 text-white px-4 py-2 rounded">Simulate Traffic Jam</button>
     <div id="dashboard-text" class="my-4"></div>
+    <div id="story" class="my-4 text-green-600"></div>
     <div id="route-visual" class="w-full h-64"></div>
     <p id="carbon-saved"></p>
-    <p id="tokens-earned"></p>
+    <p id="points-earned"></p>
+    <div id="leaderboard" class="my-4">
+        <h2 class="text-xl">Leaderboard</h2>
+        <ul id="leaderboard-list"></ul>
+    </div>
 
     <script>
-        fetch('/api/optimize').then(res => res.json()).then(route => {
-            fetch('/api/dashboard').then(res => res.json()).then(dashboard => {
-                fetch('/api/reward').then(res => res.json()).then(reward => {
-                    document.getElementById('dashboard-text').innerText = dashboard.text || 'Loading...';
-                    document.getElementById('carbon-saved').innerText = `Carbon Saved: ${route.emissions_kg || 0} kg`;
-                    document.getElementById('tokens-earned').innerText = `Tokens Earned: ${reward.tokens || 0}`;
+        function updateDashboard() {
+            fetch('/api/forecast').then(res => res.json()).then(forecast => {
+                fetch('/api/optimize').then(res => res.json()).then(route => {
+                    fetch('/api/dashboard').then(res => res.json()).then(dashboard => {
+                        fetch('/api/reward').then(res => res.json()).then(reward => {
+                            document.getElementById('dashboard-text').innerText = dashboard.text || 'Loading...';
+                            document.getElementById('story').innerText = dashboard.story || '';
+                            document.getElementById('carbon-saved').innerText = `Carbon Saved: ${route.emissions_kg || 0} kg`;
+                            document.getElementById('points-earned').innerText = `Points Earned: ${reward.points || 0}`;
+                            document.getElementById('leaderboard-list').innerHTML = dashboard.leaderboard?.map(d => `<li>${d.driver}: ${d.points}</li>`).join('') || '';
 
-                    // 3D route visualization
-                    const trace = {
-                        x: [0, 100], y: [0, 50], z: [0, 10],
-                        type: 'scatter3d',
-                        mode: 'lines+markers',
-                        marker: { size: 5, color: 'green' }
-                    };
-                    Plotly.newPlot('route-visual', [trace], {
-                        scene: { xaxis: { title: 'X' }, yaxis: { title: 'Y' }, zaxis: { title: 'Z' } }
+                            // 3D route visualization
+                            const trace = {
+                                x: [0, 100], y: [0, 50], z: [0, 10],
+                                type: 'scatter3d',
+                                mode: 'lines+markers',
+                                marker: { size: 5, color: 'green' }
+                            };
+                            Plotly.newPlot('route-visual', [trace], {
+                                scene: { xaxis: { title: 'X' }, yaxis: { title: 'Y' }, zaxis: { title: 'Z' } }
+                            });
+                        });
                     });
                 });
             });
+        }
+        updateDashboard();
+        document.getElementById('disrupt').addEventListener('click', () => {
+            fetch('/api/disrupt', { method: 'POST' }).then(updateDashboard);
         });
     </script>
 </body>
 </html>
 
-# blockchain/token.py
-from solana.rpc.api import Client
-from solana.keypair import Keypair
-from spl.token.client import Token
-
-def create_token():
-    client = Client("https://api.devnet.solana.com")
-    payer = Keypair.generate()
-    # Mock token creation for hackathon
-    return {"address": "mock_token_address"}
-
-if __name__ == "__main__":
-    print(create_token())
-
 # requirements.txt
 flask==2.0.1
 openai-agents==0.1.0
-solana==0.30.0
 plotly==5.10.0
+pydantic==1.10.7
 ```
 
 ```
