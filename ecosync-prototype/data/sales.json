@@ -1,0 +1,14 @@
+[
+  {
+    "product": "Heater",
+    "date": "2025-04-26",
+    "units_sold": 100,
+    "weather": "cold"
+  },
+  {
+    "product": "Heater",
+    "date": "2025-04-27",
+    "units_sold": 120,
+    "weather": "cold"
+  }
+] 

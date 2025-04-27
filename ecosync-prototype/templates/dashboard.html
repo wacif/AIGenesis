@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSync - Supply Chain Sustainability Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plotly.io/plotly-2.14.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .card {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+        }
+        .loader {
+            border-top-color: #22c55e;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold text-green-600">EcoSync</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="#" class="border-green-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Dashboard
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Supply Chain
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Analytics
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Settings
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-300">
+                        <i class="fas fa-bell mr-2"></i> Notifications
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header section -->
+        <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Supply Chain Dashboard</h1>
+                <p class="mt-1 text-gray-600" id="dashboard-text">Loading dashboard data...</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <button id="disrupt" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors duration-300">
+                    <i class="fas fa-exclamation-triangle mr-2"></i> Simulate Traffic Jam
+                </button>
+            </div>
+        </div>
+
+        <div id="loading-indicator" class="flex items-center justify-center py-12 hidden">
+            <div class="loader border-4 border-gray-200 rounded-full w-12 h-12"></div>
+            <span class="ml-3 text-gray-600">Updating data...</span>
+        </div>
+
+        <div id="dashboard-content">
+            <!-- Stats cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="card bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 text-green-600">
+                            <i class="fas fa-leaf text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Carbon Saved</p>
+                            <p class="text-xl font-semibold text-gray-900" id="carbon-saved">- kg</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                            <i class="fas fa-award text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Points Earned</p>
+                            <p class="text-xl font-semibold text-gray-900" id="points-earned">-</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                            <i class="fas fa-truck text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Route Status</p>
+                            <p class="text-xl font-semibold text-gray-900" id="route-status">-</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card bg-white rounded-lg shadow-md p-6 border-l-4 border-amber-500">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-amber-100 text-amber-600">
+                            <i class="fas fa-boxes-stacked text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Forecast</p>
+                            <p class="text-xl font-semibold text-gray-900" id="forecast-data">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Route visualization -->
+                <div class="lg:col-span-2 card bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Optimized Route</h2>
+                    </div>
+                    <div class="p-4">
+                        <div id="route-visual" class="w-full h-80"></div>
+                    </div>
+                </div>
+                
+                <!-- Sustainability story -->
+                <div class="card bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Sustainability Impact</h2>
+                    </div>
+                    <div class="gradient-bg text-white p-6 flex flex-col items-center text-center">
+                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-tree text-green-600 text-2xl"></i>
+                        </div>
+                        <p class="text-lg font-medium mb-2" id="story">Loading impact data...</p>
+                        <div class="mt-4 bg-white bg-opacity-20 rounded-lg p-4 w-full">
+                            <p class="text-sm font-medium">Your actions are making a difference!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Leaderboard -->
+            <div class="mt-6 card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Sustainability Leaderboard</h2>
+                </div>
+                <div class="p-4">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-list" class="bg-white divide-y divide-gray-200">
+                                <!-- Leaderboard data will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById('loading-indicator').classList.remove('hidden');
+            document.getElementById('dashboard-content').classList.add('opacity-50');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading-indicator').classList.add('hidden');
+            document.getElementById('dashboard-content').classList.remove('opacity-50');
+        }
+        
+        function updateDashboard() {
+            showLoading();
+            
+            Promise.all([
+                fetch('/api/forecast').then(res => res.json()),
+                fetch('/api/optimize').then(res => res.json()),
+                fetch('/api/dashboard').then(res => res.json()),
+                fetch('/api/reward').then(res => res.json())
+            ]).then(([forecast, route, dashboard, reward]) => {
+                // Update dashboard text and main elements
+                document.getElementById('dashboard-text').innerText = dashboard.text || 'No data available';
+                document.getElementById('story').innerText = dashboard.story || 'No impact data available';
+                document.getElementById('carbon-saved').innerText = `${route.emissions_kg || 0} kg`;
+                document.getElementById('points-earned').innerText = `${reward.points || 0} points`;
+                document.getElementById('route-status').innerText = route.route_id ? `Route #${route.route_id}` : 'Unavailable';
+                document.getElementById('forecast-data').innerText = forecast.units_needed ? `${forecast.units_needed} units` : 'No forecast';
+                
+                // Update leaderboard
+                const leaderboardHtml = dashboard.leaderboard?.map((d, index) => `
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">#${index + 1}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                        <span class="text-gray-600">${d.driver.charAt(0)}</span>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">${d.driver}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${d.points}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${index === 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                ${index === 0 ? 'Leading' : 'Active'}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('') || '';
+                
+                document.getElementById('leaderboard-list').innerHTML = leaderboardHtml;
+
+                // Enhanced 3D route visualization with more realistic route data
+                const points = 20; // More points for smoother curve
+                const x = Array.from({length: points}, (_, i) => i * (100 / (points - 1)));
+                const y = x.map(val => 50 * Math.sin(val / 100 * Math.PI) + Math.random() * 5);
+                const z = x.map(val => 5 * Math.cos(val / 100 * Math.PI * 2) + Math.random() * 2);
+                
+                const trace = {
+                    x: x,
+                    y: y,
+                    z: z,
+                    type: 'scatter3d',
+                    mode: 'lines+markers',
+                    line: {
+                        width: 6,
+                        color: '#22c55e',
+                        colorscale: 'Viridis'
+                    },
+                    marker: {
+                        size: 4,
+                        color: z,
+                        colorscale: 'Viridis'
+                    }
+                };
+                
+                const layout = {
+                    margin: {l: 0, r: 0, t: 0, b: 0},
+                    scene: {
+                        aspectmode: 'cube',
+                        xaxis: {title: 'Distance (km)', showgrid: true, gridcolor: '#e5e7eb'},
+                        yaxis: {title: 'Route Path', showgrid: true, gridcolor: '#e5e7eb'},
+                        zaxis: {title: 'Elevation (m)', showgrid: true, gridcolor: '#e5e7eb'},
+                        camera: {
+                            eye: {x: 1.5, y: 1.5, z: 1}
+                        }
+                    },
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)'
+                };
+                
+                Plotly.newPlot('route-visual', [trace], layout);
+                
+                hideLoading();
+            }).catch(error => {
+                console.error('Error updating dashboard:', error);
+                document.getElementById('dashboard-text').innerText = 'Error loading dashboard data';
+                hideLoading();
+            });
+        }
+        
+        // Initial load
+        updateDashboard();
+        
+        // Event listener for traffic disruption button
+        document.getElementById('disrupt').addEventListener('click', () => {
+            showLoading();
+            fetch('/api/disrupt', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    setTimeout(updateDashboard, 1000); // Slight delay to show loading
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                hideLoading();
+            });
+        });
+    </script>
+</body>
+</html> 

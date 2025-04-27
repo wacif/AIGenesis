@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "from": "Warehouse A",
+    "to": "Customer B",
+    "distance_km": 100,
+    "time_min": 60,
+    "cost_usd": 50,
+    "emissions_kg": 20
+  },
+  {
+    "id": 2,
+    "from": "Warehouse A",
+    "to": "Customer B",
+    "distance_km": 120,
+    "time_min": 70,
+    "cost_usd": 45,
+    "emissions_kg": 15
+  }
+] 
