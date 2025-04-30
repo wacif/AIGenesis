@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSync - Agent Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .card {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+        }
+        .loader {
+            border-top-color: #22c55e;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .message {
+            max-width: 80%;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 1rem;
+        }
+        .user-message {
+            background-color: #e9f5ff;
+            margin-left: auto;
+            border-bottom-right-radius: 0.25rem;
+        }
+        .agent-message {
+            background-color: #f0f0f0;
+            border-bottom-left-radius: 0.25rem;
+        }
+        .chat-container {
+            height: calc(100vh - 300px);
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-bold text-green-600">EcoSync</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="/" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Dashboard
+                        </a>
+                        <a href="/agent" class="border-green-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Agent Interface
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Route Planning
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Analytics
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-300">
+                        <i class="fas fa-bell mr-2"></i> Notifications
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header section -->
+        <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">EcoSync Agent</h1>
+                <p class="mt-1 text-gray-600">Ask me about weather conditions or strike information!</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <div class="flex space-x-4">
+                    <button id="weather-example" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors duration-300">
+                        <i class="fas fa-cloud-sun mr-2"></i> Weather Example
+                    </button>
+                    <button id="strike-example" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors duration-300">
+                        <i class="fas fa-bullhorn mr-2"></i> Strike Example
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading-indicator" class="flex items-center justify-center py-12 hidden">
+            <div class="loader border-4 border-gray-200 rounded-full w-12 h-12"></div>
+            <span class="ml-3 text-gray-600">Processing your request...</span>
+        </div>
+
+        <!-- Chat UI -->
+        <div class="grid grid-cols-1 gap-6">
+            <!-- Chat messages -->
+            <div class="card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-4 border-b border-gray-200 bg-green-50">
+                    <h2 class="text-lg font-semibold text-gray-900">Agent Conversation</h2>
+                    <p class="text-sm text-gray-600">Your conversation with the EcoSync agent will appear here</p>
+                </div>
+                <div class="p-6">
+                    <div id="chat-container" class="chat-container flex flex-col space-y-4">
+                        <div class="message agent-message">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 mr-3">
+                                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                                        <i class="fas fa-robot text-green-600"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">EcoSync Agent</p>
+                                    <p class="text-sm text-gray-700">Hello! I'm the EcoSync agent. You can ask me about:</p>
+                                    <ul class="list-disc list-inside text-sm text-gray-700 mt-2">
+                                        <li>Weather conditions in a specific city</li>
+                                        <li>Strike or protest information for a specific date</li>
+                                    </ul>
+                                    <p class="text-sm text-gray-700 mt-2">How can I help you today?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Query input -->
+            <div class="card bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Ask a Question</h2>
+                </div>
+                <div class="p-6">
+                    <form id="query-form" class="space-y-6">
+                        <div>
+                            <label for="query" class="block text-sm font-medium text-gray-700">Your Query</label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
+                                <textarea 
+                                    id="query" 
+                                    name="query" 
+                                    rows="3" 
+                                    class="focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md p-2 border"
+                                    placeholder="e.g., 'What's the weather like in New York?' or 'Any strikes in London on May 1, 2025?'"
+                                ></textarea>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-300">
+                                <i class="fas fa-paper-plane mr-2"></i> Send Query
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById('loading-indicator').classList.remove('hidden');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading-indicator').classList.add('hidden');
+        }
+        
+        // Add a user message to the chat
+        function addUserMessage(message) {
+            const chatContainer = document.getElementById('chat-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user-message';
+            messageDiv.innerHTML = `
+                <div class="flex items-start justify-end">
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-gray-900">You</p>
+                        <p class="text-sm text-gray-700">${message}</p>
+                    </div>
+                    <div class="flex-shrink-0 ml-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-user text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Add an agent message to the chat
+        function addAgentMessage(message, agentName = "EcoSync Agent") {
+            const chatContainer = document.getElementById('chat-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message agent-message';
+            messageDiv.innerHTML = `
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 mr-3">
+                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-robot text-green-600"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">${agentName}</p>
+                        <p class="text-sm text-gray-700">${message.replace(/\n/g, '<br>')}</p>
+                    </div>
+                </div>
+            `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Form submission
+        document.getElementById('query-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const query = document.getElementById('query').value.trim();
+            
+            if (!query) {
+                alert('Please enter a query');
+                return;
+            }
+            
+            addUserMessage(query);
+            showLoading();
+            
+            fetch('/api/agent/query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                hideLoading();
+                addAgentMessage(data.response, data.agent);
+                document.getElementById('query').value = '';
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Error:', error);
+                addAgentMessage('Sorry, there was an error processing your request. Please try again later.');
+            });
+        });
+        
+        // Example buttons
+        document.getElementById('weather-example').addEventListener('click', function() {
+            const query = "What's the weather like in London today?";
+            document.getElementById('query').value = query;
+        });
+        
+        document.getElementById('strike-example').addEventListener('click', function() {
+            const query = "Any strikes in Paris on May 1, 2025?";
+            document.getElementById('query').value = query;
+        });
+    </script>
+</body>
+</html>

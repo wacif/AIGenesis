@@ -1,6 +1,22 @@
-from flask import render_template, jsonify
+from flask import render_template, jsonify, request
 from app import app
 import json
+import asyncio
+import os
+
+# Import agent modules
+from app.agents.weather_agent import run_weather_agent
+from app.agents.strike_agent import run_strike_agent
+from app.agents.triage_agent import run_triage_agent
+
+# Create a helper function to run async functions
+def run_async(coro):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
 
 @app.route('/api/forecast', methods=['GET'])
 def forecast():
@@ -51,6 +67,115 @@ def disrupt():
         json.dump({"route_id": 1, "delay_min": 30}, f)
     return jsonify({"status": "Traffic jam added"})
 
+@app.route('/api/agent/query', methods=['POST'])
+def agent_query():
+    """
+    Process a user query through the triage agent and route to the appropriate specialized agent.
+    """
+    data = request.json
+    if not data or 'query' not in data:
+        return jsonify({"error": "Missing 'query' in request body"}), 400
+    
+    query = data['query']
+    
+    try:
+        # First, use the triage agent to determine which specialized agent to use
+        agent_type, triage_message = run_async(run_triage_agent(query))
+        
+        # Based on the triage result, route to the appropriate agent
+        if agent_type == 'weather':
+            response = run_async(run_weather_agent(query))
+            agent_name = "Weather Agent"
+        elif agent_type == 'strike':
+            response = run_async(run_strike_agent(query))
+            agent_name = "Strike Agent"
+        else:
+            response = "I'm not sure how to process your query. Could you please clarify what information you're looking for? You can ask about weather conditions in a specific city or about strikes/protests on a specific date."
+            agent_name = "Triage Agent"
+        
+        return jsonify({
+            "response": response,
+            "agent": agent_name,
+            "triage_message": triage_message
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/agent/weather', methods=['POST'])
+def agent_weather():
+    """
+    Process a weather query directly through the weather agent.
+    """
+    data = request.json
+    if not data or 'query' not in data:
+        return jsonify({"error": "Missing 'query' in request body"}), 400
+    
+    query = data['query']
+    
+    try:
+        response = run_async(run_weather_agent(query))
+        return jsonify({"response": response})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/agent/strike', methods=['POST'])
+def agent_strike():
+    """
+    Process a strike query directly through the strike agent.
+    """
+    data = request.json
+    if not data or 'query' not in data:
+        return jsonify({"error": "Missing 'query' in request body"}), 400
+    
+    query = data['query']
+    
+    try:
+        response = run_async(run_strike_agent(query))
+        return jsonify({"response": response})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/chat', methods=['POST'])
+def handle_chat():
+    """
+    Process a chat message through the triage agent and route to the appropriate specialized agent.
+    Returns both the response and which agent type provided the response.
+    """
+    data = request.json
+    if not data or 'message' not in data:
+        return jsonify({"error": "Missing 'message' in request body"}), 400
+    
+    message = data['message']
+    
+    try:
+        # Use the triage agent to determine which specialized agent to use
+        agent_type, triage_message = run_async(run_triage_agent(message))
+        
+        # Based on the triage result, route to the appropriate agent
+        if agent_type == 'weather':
+            response = run_async(run_weather_agent(message))
+        elif agent_type == 'strike':
+            response = run_async(run_strike_agent(message))
+        else:
+            # If the triage agent couldn't determine a specific agent, use its message
+            response = triage_message
+            agent_type = 'triage'
+        
+        return jsonify({
+            "response": response,
+            "agent_type": agent_type
+        })
+    except Exception as e:
+        app.logger.error(f"Error in chat processing: {str(e)}")
+        return jsonify({
+            "response": "I'm sorry, I encountered an error processing your request. Please try again.",
+            "agent_type": "triage"
+        }), 500
+
 @app.route('/')
 def index():
-    return render_template('dashboard.html') 
+    return render_template('dashboard.html')
+
+@app.route('/agent')
+def agent_ui():
+    return render_template('agent.html')

@@ -8,27 +8,59 @@
     <script src="https://cdn.plotly.io/plotly-2.14.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        .card {
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
         .gradient-bg {
             background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
         }
-        .loader {
-            border-top-color: #22c55e;
-            animation: spinner 1.5s linear infinite;
+        .agent-indicator {
+            animation: pulse 2s infinite;
         }
-        @keyframes spinner {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        .message-bubble {
+            transition: all 0.3s ease;
+        }
+        .message-bubble:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .loader {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 3px solid rgba(22, 163, 74, 0.2);
+            border-top-color: rgba(22, 163, 74, 1);
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .typing-indicator::after {
+            content: '';
+            animation: ellipsis 1.5s infinite;
+        }
+        @keyframes ellipsis {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+            100% { content: '.'; }
+        }
+        .scroll-smooth {
+            scroll-behavior: smooth;
+        }
+        .shipping-form-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .shipping-form-container.open {
+            max-height: 2000px;
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 h-screen flex flex-col">
     <!-- Navigation -->
     <nav class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,199 +94,139 @@
     </nav>
 
     <!-- Main content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Header section -->
-        <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">Route Optimization</h1>
-                <p class="mt-1 text-gray-600" id="dashboard-text">Plan your sustainable route with our AI agent</p>
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <!-- Sidebar - Agent Information -->
+        <div class="w-full md:w-1/4 bg-white shadow-md p-4 overflow-y-auto">
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">EcoSync AI Assistant</h2>
+                <p class="text-sm text-gray-600">Ask me anything about supply chain sustainability, weather conditions, strike updates, or route optimization.</p>
             </div>
-            <div class="mt-4 md:mt-0">
-                <button id="disrupt" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors duration-300">
-                    <i class="fas fa-exclamation-triangle mr-2"></i> Simulate Traffic Jam
-                </button>
+            
+            <div class="space-y-4">
+                <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                    <div class="flex items-center mb-2">
+                        <div class="w-2 h-2 rounded-full bg-green-500 mr-2 agent-indicator"></div>
+                        <h3 class="font-medium text-green-800">Triage Agent</h3>
+                    </div>
+                    <p class="text-xs text-gray-600">Main assistant that routes your questions to specialized agents</p>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="flex items-center mb-2">
+                        <div class="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
+                        <h3 class="font-medium text-gray-800">Weather Agent</h3>
+                    </div>
+                    <p class="text-xs text-gray-600">Provides real-time weather updates for specific locations</p>
+                </div>
+            </div>
+            
+            <div class="mt-8 space-y-2">
+                <h3 class="text-sm font-medium text-gray-700">Suggested Questions</h3>
+                <div id="suggested-questions" class="space-y-2">
+                    <button class="question-btn text-left w-full text-sm bg-gray-100 hover:bg-gray-200 p-2 rounded-md transition-colors">What's the weather like in London?</button>
+                    <button class="question-btn text-left w-full text-sm bg-gray-100 hover:bg-gray-200 p-2 rounded-md transition-colors">Any strikes affecting shipping routes today?</button>
+                    <button class="question-btn text-left w-full text-sm bg-gray-100 hover:bg-gray-200 p-2 rounded-md transition-colors">Optimize my route from New York to Chicago</button>
+                </div>
             </div>
         </div>
-
-        <div id="loading-indicator" class="flex items-center justify-center py-12 hidden">
-            <div class="loader border-4 border-gray-200 rounded-full w-12 h-12"></div>
-            <span class="ml-3 text-gray-600">Finding optimal routes...</span>
-        </div>
-
-        <!-- Route Planner Card -->
-        <div class="card bg-white rounded-lg shadow-md overflow-hidden mb-8">
-            <div class="p-4 border-b border-gray-200 bg-green-50">
-                <h2 class="text-lg font-semibold text-gray-900">Route Planner</h2>
-                <p class="text-sm text-gray-600">Enter your starting point and destination to find the most sustainable route</p>
+        
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col bg-gray-50 overflow-hidden">
+            <!-- Chat history -->
+            <div id="chat-history" class="flex-1 p-4 overflow-y-auto scroll-smooth">
+                <!-- Welcome message -->
+                <div class="flex mb-4">
+                    <div class="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white mr-2 flex-shrink-0">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-bubble max-w-3xl bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-center mb-1">
+                            <span class="text-xs font-semibold text-green-700">Triage Agent</span>
+                            <span class="text-xs text-gray-500 ml-2">Today, 9:30 AM</span>
+                        </div>
+                        <p class="text-gray-800">Welcome to EcoSync! I'm your supply chain sustainability assistant. I can help you with weather updates, strike information, route optimization, and more. How can I assist you today?</p>
+                    </div>
+                </div>
+                
+                <!-- Messages will be dynamically added here -->
             </div>
-            <div class="p-6">
-                <form id="route-form" class="space-y-6">
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <div>
-                            <label for="start-location" class="block text-sm font-medium text-gray-700">Starting Point</label>
-                            <div class="mt-1 relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-map-marker-alt text-gray-400"></i>
-                                </div>
-                                <input type="text" name="start-location" id="start-location" class="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Enter starting location">
-                            </div>
-                        </div>
-                        <div>
-                            <label for="destination" class="block text-sm font-medium text-gray-700">Destination</label>
-                            <div class="mt-1 relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <i class="fas fa-flag-checkered text-gray-400"></i>
-                                </div>
-                                <input type="text" name="destination" id="destination" class="focus:ring-green-500 focus:border-green-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md p-2 border" placeholder="Enter destination">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                        <div>
-                            <label for="shipment-type" class="block text-sm font-medium text-gray-700">Shipment Type</label>
-                            <select id="shipment-type" name="shipment-type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md border">
-                                <option value="standard">Standard Delivery</option>
-                                <option value="express">Express Delivery</option>
-                                <option value="eco">Eco-Friendly Only</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="vehicle-type" class="block text-sm font-medium text-gray-700">Vehicle Type</label>
-                            <select id="vehicle-type" name="vehicle-type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md border">
-                                <option value="truck">Truck</option>
-                                <option value="van">Van</option>
-                                <option value="ev">Electric Vehicle</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
-                            <select id="priority" name="priority" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md border">
-                                <option value="balanced">Balanced</option>
-                                <option value="time">Fastest Route</option>
-                                <option value="eco">Most Eco-Friendly</option>
-                                <option value="cost">Lowest Cost</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-300">
-                            <i class="fas fa-route mr-2"></i> Find Optimal Route
-                        </button>
-                    </div>
+            
+            <!-- Chat input -->
+            <div class="bg-white border-t border-gray-200 p-4">
+                <form id="chat-form" class="flex items-center">
+                    <input 
+                        type="text" 
+                        id="user-input" 
+                        class="flex-1 border border-gray-300 rounded-lg py-3 px-4 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                        placeholder="Ask something about your supply chain, weather, or strikes..."
+                    >
+                    <button 
+                        type="submit"
+                        class="ml-2 bg-green-600 hover:bg-green-700 text-white rounded-lg p-3 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                    >
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </form>
             </div>
         </div>
-
-        <div id="dashboard-content">
-            <!-- Route Results Section (Initially Hidden) -->
-            <div id="route-results" class="hidden mb-8">
-                <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-md">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-check-circle text-green-600"></i>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-medium text-green-800">Route Found</h3>
-                            <div class="mt-2 text-sm text-green-700">
-                                <p id="route-summary">Our AI has found the optimal route for your journey.</p>
-                            </div>
-                        </div>
+        
+        <!-- Analytics Sidebar (hidden on mobile) -->
+        <div class="hidden lg:block w-1/4 bg-white shadow-md p-4 overflow-y-auto">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Sustainability Insights</h2>
+            
+            <!-- Carbon Impact -->
+            <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Carbon Footprint Status</h3>
+                <div class="bg-green-50 rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-sm text-gray-600">Current Impact</span>
+                        <span class="text-sm font-medium text-green-700">-45% vs. Industry Avg</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-green-600 h-2.5 rounded-full" style="width: 45%"></div>
                     </div>
                 </div>
             </div>
             
-            <!-- Main grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Route visualization -->
-                <div class="lg:col-span-2 card bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="p-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Optimized Route</h2>
+            <!-- Recent Alerts -->
+            <div class="mb-6">
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Recent Alerts</h3>
+                <div class="space-y-2">
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded-r-lg">
+                        <p class="text-xs font-medium text-amber-800">Strike alert in Rotterdam Port</p>
+                        <p class="text-xs text-amber-700 mt-1">May affect shipping routes for the next 48 hours</p>
                     </div>
-                    <div class="p-4">
-                        <div id="route-visual" class="w-full h-80"></div>
-                    </div>
-                </div>
-                
-                <!-- Route details -->
-                <div class="card bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="p-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Route Details</h2>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-500">Starting Point</h3>
-                            <p id="result-start" class="mt-1 text-base font-medium text-gray-900">-</p>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-500">Destination</h3>
-                            <p id="result-destination" class="mt-1 text-base font-medium text-gray-900">-</p>
-                        </div>
-                        <div class="pt-4 border-t border-gray-200">
-                            <div class="flex justify-between">
-                                <div>
-                                    <h3 class="text-sm font-medium text-gray-500">Distance</h3>
-                                    <p id="result-distance" class="mt-1 text-base font-medium text-gray-900">-</p>
-                                </div>
-                                <div>
-                                    <h3 class="text-sm font-medium text-gray-500">Estimated Time</h3>
-                                    <p id="result-time" class="mt-1 text-base font-medium text-gray-900">-</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="pt-4 border-t border-gray-200">
-                            <h3 class="text-sm font-medium text-gray-500">Emissions</h3>
-                            <p id="carbon-saved" class="mt-1 text-base font-medium text-green-600">- kg CO2</p>
-                            <div class="mt-2 w-full bg-gray-200 rounded-full h-2.5">
-                                <div id="emissions-bar" class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
-                            </div>
-                            <p class="mt-1 text-xs text-gray-500">Compared to standard routes</p>
-                        </div>
-
-                        <div class="pt-4 border-t border-gray-200">
-                            <h3 class="text-sm font-medium text-gray-500">Sustainability Impact</h3>
-                            <p id="story" class="mt-1 text-base font-medium text-gray-900">-</p>
-                            <p id="points-earned" class="mt-2 text-sm font-medium text-green-600">-</p>
-                        </div>
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-lg">
+                        <p class="text-xs font-medium text-blue-800">Severe weather in Chicago area</p>
+                        <p class="text-xs text-blue-700 mt-1">Potential delivery delays of 3-5 hours</p>
                     </div>
                 </div>
             </div>
             
-            <!-- Stats cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                <div class="card bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
-                    <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-green-100 text-green-600">
-                            <i class="fas fa-truck-fast text-xl"></i>
+            <!-- Active Routes -->
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 mb-2">Active Routes</h3>
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="p-3 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-medium">Route #SR-42178</span>
+                            <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">On Time</span>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Route Status</p>
-                            <p class="text-xl font-semibold text-gray-900" id="route-status">-</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-                    <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
-                            <i class="fas fa-calendar-check text-xl"></i>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Estimated Delivery</p>
-                            <p class="text-xl font-semibold text-gray-900" id="delivery-time">-</p>
+                        <div class="flex items-center mt-1">
+                            <span class="text-xs text-gray-500">New York → Chicago</span>
+                            <span class="mx-2 text-gray-400">•</span>
+                            <span class="text-xs text-gray-500">ETA: 3:30 PM</span>
                         </div>
                     </div>
-                </div>
-                
-                <div class="card bg-white rounded-lg shadow-md p-6 border-l-4 border-amber-500">
-                    <div class="flex items-center">
-                        <div class="p-3 rounded-full bg-amber-100 text-amber-600">
-                            <i class="fas fa-boxes-stacked text-xl"></i>
+                    <div class="p-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-medium">Route #SR-42180</span>
+                            <span class="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded-full">Delayed</span>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-500">Forecast</p>
-                            <p class="text-xl font-semibold text-gray-900" id="forecast-data">-</p>
+                        <div class="flex items-center mt-1">
+                            <span class="text-xs text-gray-500">Seattle → Portland</span>
+                            <span class="mx-2 text-gray-400">•</span>
+                            <span class="text-xs text-gray-500">ETA: 5:15 PM</span>
                         </div>
                     </div>
                 </div>
@@ -263,133 +235,166 @@
     </div>
 
     <script>
-        function showLoading() {
-            document.getElementById('loading-indicator').classList.remove('hidden');
-            document.getElementById('dashboard-content').classList.add('opacity-50');
-        }
-        
-        function hideLoading() {
-            document.getElementById('loading-indicator').classList.add('hidden');
-            document.getElementById('dashboard-content').classList.remove('opacity-50');
-        }
-        
-        function updateDashboard() {
-            showLoading();
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatForm = document.getElementById('chat-form');
+            const userInput = document.getElementById('user-input');
+            const chatHistory = document.getElementById('chat-history');
+            const suggestedQuestions = document.querySelectorAll('.question-btn');
             
-            Promise.all([
-                fetch('/api/forecast').then(res => res.json()),
-                fetch('/api/optimize').then(res => res.json()),
-                fetch('/api/dashboard').then(res => res.json()),
-                fetch('/api/reward').then(res => res.json())
-            ]).then(([forecast, route, dashboard, reward]) => {
-                // Update route details
-                document.getElementById('route-results').classList.remove('hidden');
-                document.getElementById('carbon-saved').innerText = `${route.emissions_kg || 0} kg CO2`;
-                document.getElementById('emissions-bar').style.width = '45%'; // Set dynamically based on emissions savings
-                document.getElementById('story').innerText = dashboard.story || 'No impact data available';
-                document.getElementById('points-earned').innerText = `Earned ${reward.points || 0} sustainability points`;
-                document.getElementById('route-status').innerText = route.route_id ? `Route #${route.route_id}` : 'Unavailable';
-                document.getElementById('forecast-data').innerText = forecast.units_needed ? `${forecast.units_needed} units` : 'No forecast';
-                
-                // Set mock route details
-                document.getElementById('route-summary').innerText = 'Our AI has found the optimal route that reduces carbon emissions by 45% compared to standard routes.';
-                document.getElementById('result-distance').innerText = '128 km';
-                document.getElementById('result-time').innerText = '2 hrs 15 min';
-                document.getElementById('delivery-time').innerText = 'Apr 28, 10:30 AM';
-                
-                // Enhanced 3D route visualization with more realistic route data
-                const points = 20; // More points for smoother curve
-                const x = Array.from({length: points}, (_, i) => i * (100 / (points - 1)));
-                const y = x.map(val => 50 * Math.sin(val / 100 * Math.PI) + Math.random() * 5);
-                const z = x.map(val => 5 * Math.cos(val / 100 * Math.PI * 2) + Math.random() * 2);
-                
-                const trace = {
-                    x: x,
-                    y: y,
-                    z: z,
-                    type: 'scatter3d',
-                    mode: 'lines+markers',
-                    line: {
-                        width: 6,
-                        color: '#22c55e',
-                        colorscale: 'Viridis'
-                    },
-                    marker: {
-                        size: 4,
-                        color: z,
-                        colorscale: 'Viridis'
-                    }
-                };
-                
-                const layout = {
-                    margin: {l: 0, r: 0, t: 0, b: 0},
-                    scene: {
-                        aspectmode: 'cube',
-                        xaxis: {title: 'Distance (km)', showgrid: true, gridcolor: '#e5e7eb'},
-                        yaxis: {title: 'Route Path', showgrid: true, gridcolor: '#e5e7eb'},
-                        zaxis: {title: 'Elevation (m)', showgrid: true, gridcolor: '#e5e7eb'},
-                        camera: {
-                            eye: {x: 1.5, y: 1.5, z: 1}
-                        }
-                    },
-                    paper_bgcolor: 'rgba(0,0,0,0)',
-                    plot_bgcolor: 'rgba(0,0,0,0)'
-                };
-                
-                Plotly.newPlot('route-visual', [trace], layout);
-                
-                hideLoading();
-            }).catch(error => {
-                console.error('Error updating dashboard:', error);
-                document.getElementById('dashboard-text').innerText = 'Error loading route data';
-                hideLoading();
+            // Map to track active agent for messages
+            const agentTypes = {
+                'triage': {name: 'Triage Agent', icon: 'fa-robot', color: 'green'},
+                'weather': {name: 'Weather Agent', icon: 'fa-cloud-sun', color: 'blue'},
+                'strike': {name: 'Strike Updates Agent', icon: 'fa-exclamation-triangle', color: 'amber'}
+            };
+            
+            let currentAgent = 'triage';
+            
+            // Add event listeners to suggested questions
+            suggestedQuestions.forEach(button => {
+                button.addEventListener('click', function() {
+                    userInput.value = this.textContent;
+                    chatForm.dispatchEvent(new Event('submit'));
+                });
             });
-        }
-        
-        // Form submission
-        document.getElementById('route-form').addEventListener('submit', function(e) {
-            e.preventDefault();
             
-            const startLocation = document.getElementById('start-location').value;
-            const destination = document.getElementById('destination').value;
+            // Handle form submission
+            chatForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const message = userInput.value.trim();
+                if (!message) return;
+                
+                // Add user message to chat
+                addMessage('user', message);
+                userInput.value = '';
+                
+                // Show typing indicator
+                const typingIndicator = addTypingIndicator();
+                
+                // Fake delay to simulate processing
+                setTimeout(async () => {
+                    // Remove typing indicator
+                    typingIndicator.remove();
+                    
+                    try {
+                        // Make request to server
+                        const response = await fetch('/api/chat', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ message })
+                        });
+                        
+                        if (!response.ok) throw new Error('Error getting response');
+                        
+                        const data = await response.json();
+                        
+                        // Determine which agent responded based on agent_type
+                        if (data.agent_type) {
+                            currentAgent = data.agent_type;
+                        }
+                        
+                        // Add agent response to chat
+                        addMessage(currentAgent, data.response);
+                        
+                        // Update sidebar to show active agent
+                        updateActiveAgent(currentAgent);
+                        
+                    } catch (error) {
+                        console.error('Error:', error);
+                        addMessage('triage', 'Sorry, I encountered an error processing your request. Please try again.');
+                    }
+                }, 1500);
+            });
             
-            if (!startLocation || !destination) {
-                alert('Please enter both starting point and destination');
-                return;
+            // Function to add a message to the chat
+            function addMessage(sender, text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'flex mb-4';
+                
+                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                if (sender === 'user') {
+                    messageDiv.innerHTML = `
+                        <div class="flex-grow"></div>
+                        <div class="message-bubble max-w-3xl bg-green-50 rounded-lg p-4 shadow-sm">
+                            <div class="flex items-center mb-1 justify-end">
+                                <span class="text-xs text-gray-500 mr-2">Today, ${time}</span>
+                                <span class="text-xs font-semibold text-gray-700">You</span>
+                            </div>
+                            <p class="text-gray-800 text-right">${text}</p>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 ml-2 flex-shrink-0">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    `;
+                } else {
+                    const agent = agentTypes[sender] || agentTypes.triage;
+                    messageDiv.innerHTML = `
+                        <div class="w-8 h-8 rounded-full bg-${agent.color}-600 flex items-center justify-center text-white mr-2 flex-shrink-0">
+                            <i class="fas ${agent.icon}"></i>
+                        </div>
+                        <div class="message-bubble max-w-3xl bg-white rounded-lg p-4 shadow-sm">
+                            <div class="flex items-center mb-1">
+                                <span class="text-xs font-semibold text-${agent.color}-700">${agent.name}</span>
+                                <span class="text-xs text-gray-500 ml-2">Today, ${time}</span>
+                            </div>
+                            <p class="text-gray-800">${text}</p>
+                        </div>
+                    `;
+                }
+                
+                chatHistory.appendChild(messageDiv);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
             }
             
-            // Display the input values in the results section
-            document.getElementById('result-start').innerText = startLocation;
-            document.getElementById('result-destination').innerText = destination;
+            // Function to add typing indicator
+            function addTypingIndicator() {
+                const agent = agentTypes[currentAgent];
+                const indicatorDiv = document.createElement('div');
+                indicatorDiv.className = 'flex mb-4 typing-indicator-container';
+                indicatorDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-${agent.color}-600 flex items-center justify-center text-white mr-2 flex-shrink-0">
+                        <i class="fas ${agent.icon}"></i>
+                    </div>
+                    <div class="message-bubble max-w-3xl bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-center mb-1">
+                            <span class="text-xs font-semibold text-${agent.color}-700">${agent.name}</span>
+                        </div>
+                        <p class="text-gray-800 typing-indicator">Typing</p>
+                    </div>
+                `;
+                
+                chatHistory.appendChild(indicatorDiv);
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+                
+                return indicatorDiv;
+            }
             
-            // Show loading and fetch route
-            showLoading();
-            
-            // Simulate API call delay
-            setTimeout(updateDashboard, 2000);
-        });
-        
-        // Event listener for traffic disruption button
-        document.getElementById('disrupt').addEventListener('click', () => {
-            showLoading();
-            fetch('/api/disrupt', { 
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    setTimeout(updateDashboard, 1000); // Slight delay to show loading
-                } else {
-                    throw new Error('Network response was not ok');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                hideLoading();
-            });
+            // Function to update which agent is shown as active in the sidebar
+            function updateActiveAgent(agentType) {
+                // Reset all agent indicators
+                document.querySelectorAll('.agent-indicator').forEach(el => {
+                    el.classList.remove('agent-indicator');
+                });
+                
+                // Find the agent in the sidebar and make it pulse
+                const agentElements = document.querySelectorAll('.bg-green-50, .bg-gray-50');
+                agentElements.forEach(el => {
+                    el.classList.remove('bg-green-50', 'bg-blue-50', 'bg-amber-50');
+                    el.classList.add('bg-gray-50');
+                    
+                    const agentName = el.querySelector('h3').textContent.toLowerCase();
+                    if (agentName.includes(agentTypes[agentType].name.toLowerCase())) {
+                        el.classList.remove('bg-gray-50');
+                        el.classList.add(`bg-${agentTypes[agentType].color}-50`);
+                        el.querySelector('.rounded-full').classList.add('agent-indicator');
+                    }
+                });
+            }
         });
     </script>
 </body>
-</html> 
+</html>

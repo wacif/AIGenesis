@@ -1,4 +1,0 @@
-flask==2.0.1
-plotly==5.10.0
-pydantic==1.10.7
-werkzeug==2.0.3 
