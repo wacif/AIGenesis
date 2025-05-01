@@ -3,87 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoSync Logistics - Intelligent Logistics Solutions</title>
+    <title>EcoSync Logistics - Intelligent Supply Chain Solutions</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Poppins:wght@400;500;600&family=Fira+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="chat-container">
-        <div class="header">
-            <h1>EcoSync Logistics</h1>
-            <div class="agent-selector">
-                <label for="agent-select">Active Agent:</label>
-                <select id="agent-select">
-                    {% for agent in agents %}
-                    <option value="{{ agent }}">{{ agent }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        
-        <div class="chat-messages" id="chat-messages">
-            <div class="message system">
-                <div class="message-content">
-                    <p>Welcome to EcoSync Logistics! Our intelligent system helps you with:</p>
-                    <p>• Weather forecasts and demand predictions</p>
-                    <p>• Optimized route planning and traffic updates</p>
-                    <p>Use the form below to quickly get routing or forecasting information.</p>
+    <div class="app-container">
+        <!-- Main Chat Container -->
+        <div class="chat-container">
+            <!-- Header Area -->
+            <div class="header">
+                <div class="header-content">
+                    <div class="brand">
+                        <div class="logo">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="brand-name">EcoSync Logistics</h1>
+                            <div class="brand-tagline">Intelligent Supply Chain Solutions</div>
+                        </div>
+                    </div>
+                    <div class="agent-controls">
+                        <div class="agent-selector">
+                            <label for="agent-select">Active Agent:</label>
+                            <select id="agent-select">
+                                {% for agent in agents %}
+                                <option value="{{ agent }}">{{ agent }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button id="toggle-history" class="action-button tooltip" title="View History">
+                            <i class="fas fa-history"></i>
+                            <span class="tooltip-text">Chat History</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Logistics Form Section -->
-        <div class="logistics-form" id="logistics-form">
-            <h3 class="logistics-form-title">
-                <i class="fas fa-truck"></i> Logistics Request Form
-            </h3>
-            <div class="form-fields">
-                <div class="form-group">
-                    <label for="from-location">From:</label>
-                    <input type="text" id="from-location" placeholder="Origin city (e.g., Lahore)">
+            
+            <!-- Main Area with Chat and History Panel -->
+            <div class="main-area">
+                <!-- Chat Messages Area -->
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message system">
+                        <div class="message-content">
+                            <p>Welcome to EcoSync Logistics! Our intelligent system helps you with:</p>
+                            <p>• Weather forecasts and demand predictions</p>
+                            <p>• Optimized route planning and traffic updates</p>
+                            <p>Use the form below to quickly get routing or forecasting information.</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="to-location">To:</label>
-                    <input type="text" id="to-location" placeholder="Destination city (e.g., Karachi)">
+                
+                <!-- Feature Bar -->
+                <div class="feature-bar">
+                    <div class="feature-button tooltip" id="toggle-form-button" title="Toggle Form">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span class="tooltip-text">Toggle Form</span>
+                    </div>
+                    <div class="feature-button tooltip" id="refresh-button" title="Refresh Data">
+                        <i class="fas fa-sync-alt"></i>
+                        <span class="tooltip-text">Refresh Data</span>
+                    </div>
+                    <div class="feature-button tooltip" id="export-button" title="Export Chat">
+                        <i class="fas fa-file-export"></i>
+                        <span class="tooltip-text">Export Chat</span>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="goods-type">Kind of Goods:</label>
-                    <select id="goods-type">
-                        <option value="">Select goods type...</option>
-                        <option value="Clothing">Clothing</option>
-                        <option value="Electronics">Electronics</option>
-                        <option value="Food">Food</option>
-                        <option value="Furniture">Furniture</option>
-                        <option value="Medicine">Medicine</option>
-                        <option value="Weather Equipment">Weather Equipment</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="delivery-date">Delivery Date:</label>
-                    <input type="date" id="delivery-date">
+                
+                <!-- History Panel (hidden by default) -->
+                <div class="history-panel" id="history-panel">
+                    <!-- History content will be dynamically added here -->
                 </div>
             </div>
-            <button type="button" id="submit-logistics">
-                <i class="fas fa-search"></i> Get Logistics Information
-            </button>
-        </div>
-        
-        <div class="chat-input">
-            <form id="chat-form" class="chat-form">
-                <textarea id="user-message" class="message-textarea" placeholder="Type your message here or use the form above..." rows="1"></textarea>
-                <div class="input-actions">
-                    <button type="button" class="action-button" id="clear-chat" title="Clear conversation">
-                        <i class="fas fa-trash-alt"></i>
+            
+            <!-- Logistics Form Section -->
+            <div class="logistics-form" id="logistics-form">
+                <h3 class="logistics-form-title">
+                    <i class="fas fa-truck"></i> Logistics Request Form
+                </h3>
+                <div class="form-fields">
+                    <div class="form-group">
+                        <label for="from-location"><i class="fas fa-map-marker-alt"></i> From:</label>
+                        <input type="text" id="from-location" placeholder="Origin city (e.g., Lahore)">
+                    </div>
+                    <div class="form-group">
+                        <label for="to-location"><i class="fas fa-map-pin"></i> To:</label>
+                        <input type="text" id="to-location" placeholder="Destination city (e.g., Karachi)">
+                    </div>
+                    <div class="form-group">
+                        <label for="goods-type"><i class="fas fa-box"></i> Kind of Goods:</label>
+                        <select id="goods-type">
+                            <option value="">Select goods type...</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Food">Food</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Medicine">Medicine</option>
+                            <option value="Weather Equipment">Weather Equipment</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="delivery-date"><i class="fas fa-calendar-alt"></i> Delivery Date:</label>
+                        <input type="date" id="delivery-date">
+                    </div>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" id="submit-logistics">
+                        <i class="fas fa-search"></i> Get Logistics Information
+                    </button>
+                    <button type="button" id="clear-form" class="action-button">
+                        <i class="fas fa-eraser"></i> Clear Form
                     </button>
                 </div>
-                <button type="submit">
-                    <i class="fas fa-paper-plane"></i> Send
-                </button>
-            </form>
+            </div>
+            
+            <!-- Chat Input Area -->
+            <div class="chat-input">
+                <form id="chat-form" class="chat-form">
+                    <textarea id="user-message" class="message-textarea" placeholder="Type your message here or use the form above..." rows="1"></textarea>
+                    <div class="input-actions">
+                        <button type="button" class="action-button tooltip" id="clear-chat" title="Clear conversation">
+                            <i class="fas fa-trash-alt"></i>
+                            <span class="tooltip-text">Clear Chat</span>
+                        </button>
+                    </div>
+                    <button type="submit">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 

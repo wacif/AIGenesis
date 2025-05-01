@@ -7,7 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const agentSelect = document.getElementById('agent-select');
     const clearChatButton = document.getElementById('clear-chat');
     const submitLogisticsButton = document.getElementById('submit-logistics');
+    const clearFormButton = document.getElementById('clear-form');
     const logisticsForm = document.getElementById('logistics-form');
+    const toggleFormButton = document.getElementById('toggle-form-button');
+    const historyPanel = document.getElementById('history-panel');
+    const toggleHistoryButton = document.getElementById('toggle-history');
+    const refreshButton = document.getElementById('refresh-button');
+    const exportButton = document.getElementById('export-button');
     
     // Logistics form fields
     const fromLocationInput = document.getElementById('from-location');
@@ -19,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const fromLabel = document.querySelector('label[for="from-location"]');
     const toLabel = document.querySelector('label[for="to-location"]');
     const goodsTypeLabel = document.querySelector('label[for="goods-type"]');
+    
+    // Chat history storage
+    let chatHistory = [];
     
     // Set default date to today
     const today = new Date().toISOString().split('T')[0];
@@ -51,6 +60,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Handle italic text with *
         text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        
+        // Handle bullet points
+        text = text.replace(/^[*•-] (.+)$/gm, '<li>$1</li>');
+        text = text.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
         
         // Handle URLs
         text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
@@ -85,6 +98,19 @@ document.addEventListener('DOMContentLoaded', () => {
         
         messageDiv.innerHTML = messageHTML;
         chatMessagesContainer.appendChild(messageDiv);
+        
+        // Store in chat history
+        chatHistory.push({
+            role: sender === 'user' ? 'user' : 'assistant',
+            content: content,
+            agentName: agentName,
+            timestamp: now.toISOString()
+        });
+        
+        // Update history panel if visible
+        if (historyPanel.classList.contains('visible')) {
+            updateHistoryPanel();
+        }
         
         // Scroll to the bottom
         scrollToBottom();
@@ -126,19 +152,80 @@ document.addEventListener('DOMContentLoaded', () => {
         return agentSelect.options[agentSelect.selectedIndex].text;
     }
     
+    // Function to update history panel
+    function updateHistoryPanel() {
+        // Clear current history panel
+        historyPanel.innerHTML = '';
+        
+        // Add header
+        const header = document.createElement('div');
+        header.classList.add('history-header');
+        header.innerHTML = '<h3><i class="fas fa-history"></i> Chat History</h3>';
+        historyPanel.appendChild(header);
+        
+        // Group messages by day
+        const messagesByDay = {};
+        
+        chatHistory.forEach(msg => {
+            const date = new Date(msg.timestamp);
+            const dateKey = date.toLocaleDateString();
+            
+            if (!messagesByDay[dateKey]) {
+                messagesByDay[dateKey] = [];
+            }
+            
+            messagesByDay[dateKey].push(msg);
+        });
+        
+        // Create sections for each day
+        for (const [day, messages] of Object.entries(messagesByDay)) {
+            const daySection = document.createElement('div');
+            daySection.classList.add('history-day');
+            
+            const dayHeader = document.createElement('div');
+            dayHeader.classList.add('history-day-header');
+            dayHeader.textContent = day;
+            daySection.appendChild(dayHeader);
+            
+            // Add message summaries
+            messages.forEach(msg => {
+                const msgItem = document.createElement('div');
+                msgItem.classList.add('history-message');
+                msgItem.classList.add(msg.role === 'user' ? 'user' : 'agent');
+                
+                // Truncate long messages
+                let content = msg.content;
+                if (content.length > 30) {
+                    content = content.substring(0, 30) + '...';
+                }
+                
+                const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                msgItem.innerHTML = `
+                    <div class="history-message-time">${time}</div>
+                    <div class="history-message-content">${content}</div>
+                `;
+                
+                daySection.appendChild(msgItem);
+            });
+            
+            historyPanel.appendChild(daySection);
+        }
+    }
+    
     // Function to update form labels and placeholders based on selected agent
     function updateFormForAgent(agentName) {
         const logisticsFormTitle = document.querySelector('.logistics-form-title');
         
         if (agentName.includes('Weather') || agentName.includes('Forecasting')) {
             // Update for Weather/Forecasting agent
-            fromLabel.textContent = 'Product:';
+            fromLabel.innerHTML = '<i class="fas fa-box-open"></i> Product:';
             fromLocationInput.placeholder = 'Product name (e.g., Umbrellas)';
             
-            toLabel.textContent = 'Location:';
+            toLabel.innerHTML = '<i class="fas fa-city"></i> Location:';
             toLocationInput.placeholder = 'City name (e.g., Lahore)';
             
-            goodsTypeLabel.textContent = 'Query Type:';
+            goodsTypeLabel.innerHTML = '<i class="fas fa-search"></i> Query Type:';
             
             // Clear and rebuild options for goods type select
             goodsTypeSelect.innerHTML = '';
@@ -161,13 +248,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } else if (agentName.includes('Routing') || agentName.includes('Traffic')) {
             // Update for Routing/Traffic agent
-            fromLabel.textContent = 'From:';
+            fromLabel.innerHTML = '<i class="fas fa-map-marker-alt"></i> From:';
             fromLocationInput.placeholder = 'Origin city (e.g., Lahore)';
             
-            toLabel.textContent = 'To:';
+            toLabel.innerHTML = '<i class="fas fa-map-pin"></i> To:';
             toLocationInput.placeholder = 'Destination city (e.g., Karachi)';
             
-            goodsTypeLabel.textContent = 'Transport Type:';
+            goodsTypeLabel.innerHTML = '<i class="fas fa-truck"></i> Transport Type:';
             
             // Clear and rebuild options for goods type select
             goodsTypeSelect.innerHTML = '';
@@ -191,13 +278,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } else {
             // Default form (Triage or other agents)
-            fromLabel.textContent = 'From:';
+            fromLabel.innerHTML = '<i class="fas fa-map-marker-alt"></i> From:';
             fromLocationInput.placeholder = 'Origin city (e.g., Lahore)';
             
-            toLabel.textContent = 'To:';
+            toLabel.innerHTML = '<i class="fas fa-map-pin"></i> To:';
             toLocationInput.placeholder = 'Destination city (e.g., Karachi)';
             
-            goodsTypeLabel.textContent = 'Kind of Goods:';
+            goodsTypeLabel.innerHTML = '<i class="fas fa-box"></i> Kind of Goods:';
             
             // Clear and rebuild options for goods type select
             goodsTypeSelect.innerHTML = '';
@@ -257,6 +344,37 @@ document.addEventListener('DOMContentLoaded', () => {
             removeTypingIndicator();
             addMessageToChat(`Network error: ${error.message}`, 'system');
         }
+    }
+    
+    // Function to export chat history to a text file
+    function exportChatHistory() {
+        // Create a formatted string of the chat history
+        let exportText = "EcoSync Logistics - Chat Export\n";
+        exportText += "==============================\n\n";
+        exportText += `Date: ${new Date().toLocaleDateString()}\n\n`;
+        
+        chatHistory.forEach(msg => {
+            const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const role = msg.role === 'user' ? 'You' : (msg.agentName || 'Agent');
+            exportText += `[${time}] ${role}:\n${msg.content}\n\n`;
+        });
+        
+        // Create a blob and download it
+        const blob = new Blob([exportText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ecosync-chat-export-${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    
+    // Function to toggle the form visibility
+    function toggleFormVisibility() {
+        logisticsForm.classList.toggle('collapsed');
+        toggleFormButton.classList.toggle('active');
     }
     
     // Handle form submission
@@ -365,9 +483,44 @@ document.addEventListener('DOMContentLoaded', () => {
             chatMessagesContainer.removeChild(chatMessagesContainer.lastChild);
         }
         
+        // Clear chat history array (except welcome message)
+        chatHistory = chatHistory.slice(0, 1);
+        
         // Add a system message about clearing the chat
         addMessageToChat('Chat history has been cleared.', 'system');
     });
+    
+    // Handle clear form button
+    clearFormButton.addEventListener('click', () => {
+        fromLocationInput.value = '';
+        toLocationInput.value = '';
+        goodsTypeSelect.selectedIndex = 0;
+        deliveryDateInput.value = today;
+    });
+    
+    // Handle toggle history button
+    toggleHistoryButton.addEventListener('click', () => {
+        historyPanel.classList.toggle('visible');
+        toggleHistoryButton.classList.toggle('active');
+        updateHistoryPanel();
+    });
+    
+    // Handle toggle form button
+    toggleFormButton.addEventListener('click', toggleFormVisibility);
+    
+    // Handle refresh button
+    refreshButton.addEventListener('click', () => {
+        const refreshMessage = "Refreshing data...";
+        addMessageToChat(refreshMessage, 'system');
+        
+        // Simulate refresh action
+        setTimeout(() => {
+            addMessageToChat("All data has been refreshed with the latest information.", 'system');
+        }, 1000);
+    });
+    
+    // Handle export button
+    exportButton.addEventListener('click', exportChatHistory);
     
     // Initialize form based on the default selected agent
     updateFormForAgent(getSelectedAgentName());
