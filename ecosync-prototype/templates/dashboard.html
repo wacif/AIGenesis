@@ -118,9 +118,142 @@
                     </div>
                     <p class="text-xs text-gray-600">Provides real-time weather updates for specific locations</p>
                 </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="flex items-center mb-2">
+                        <div class="w-2 h-2 rounded-full bg-amber-500 mr-2"></div>
+                        <h3 class="font-medium text-gray-800">Strike Updates Agent</h3>
+                    </div>
+                    <p class="text-xs text-gray-600">Monitors and reports on strikes that may affect your supply chain</p>
+                </div>
             </div>
             
-            <div class="mt-8 space-y-2">
+            <!-- Shipment Information Button -->
+            <div class="mt-6 mb-4">
+                <button id="toggle-shipping-form" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md text-sm font-medium transition-colors duration-300 flex items-center justify-center">
+                    <i class="fas fa-truck-loading mr-2"></i> <span id="form-button-text">Enter Shipment Details</span>
+                </button>
+            </div>
+            
+            <!-- Shipping Form (Hidden by default) -->
+            <div id="shipping-form-container" class="shipping-form-container mb-6 border border-gray-200 rounded-lg bg-gray-50 p-4">
+                <h3 class="text-sm font-medium text-gray-700 mb-4">Shipment Information</h3>
+                <form id="shipping-form" class="space-y-4">
+                    <!-- Origin and Destination -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-gray-700">Origin</label>
+                        <input type="text" name="origin" id="origin" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="City, Country">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-gray-700">Destination</label>
+                        <input type="text" name="destination" id="destination" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="City, Country">
+                    </div>
+                    
+                    <!-- Cargo Details -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-gray-700">Cargo Type</label>
+                        <select name="cargo_type" id="cargo_type" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                            <option value="">Select cargo type</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="food">Food & Perishables</option>
+                            <option value="textiles">Textiles & Clothing</option>
+                            <option value="machinery">Machinery</option>
+                            <option value="chemicals">Chemicals</option>
+                            <option value="pharmaceutical">Pharmaceutical</option>
+                            <option value="automotive">Automotive Parts</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-medium text-gray-700">Weight (kg)</label>
+                            <input type="number" name="weight" id="weight" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Weight in kg">
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-xs font-medium text-gray-700">Volume (m³)</label>
+                            <input type="number" name="volume" id="volume" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Volume in m³">
+                        </div>
+                    </div>
+                    
+                    <!-- Shipping Parameters -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-gray-700">Transport Method</label>
+                        <select name="transport_method" id="transport_method" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                            <option value="">Select transport method</option>
+                            <option value="truck">Truck</option>
+                            <option value="train">Train</option>
+                            <option value="ship">Ship</option>
+                            <option value="air">Air Freight</option>
+                            <option value="multimodal">Multimodal</option>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-medium text-gray-700">Priority</label>
+                            <select name="priority" id="priority" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                <option value="standard">Standard</option>
+                                <option value="express">Express</option>
+                                <option value="economy">Economy</option>
+                            </select>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="block text-xs font-medium text-gray-700">Temperature Requirements</label>
+                            <select name="temperature" id="temperature" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                                <option value="ambient">Ambient</option>
+                                <option value="refrigerated">Refrigerated</option>
+                                <option value="frozen">Frozen</option>
+                                <option value="controlled">Temperature Controlled</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Special Requirements -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-gray-700">Special Requirements</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex items-center">
+                                <input type="checkbox" name="hazardous" id="hazardous" class="h-4 w-4 text-green-600 border-gray-300 rounded">
+                                <label for="hazardous" class="ml-2 text-xs text-gray-700">Hazardous</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="fragile" id="fragile" class="h-4 w-4 text-green-600 border-gray-300 rounded">
+                                <label for="fragile" class="ml-2 text-xs text-gray-700">Fragile</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="eco_friendly" id="eco_friendly" class="h-4 w-4 text-green-600 border-gray-300 rounded">
+                                <label for="eco_friendly" class="ml-2 text-xs text-gray-700">Eco-Friendly Route</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="insurance" id="insurance" class="h-4 w-4 text-green-600 border-gray-300 rounded">
+                                <label for="insurance" class="ml-2 text-xs text-gray-700">Insurance</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Deadline -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-gray-700">Delivery Deadline</label>
+                        <input type="date" name="deadline" id="deadline" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+                    </div>
+                    
+                    <!-- Additional Notes -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-gray-700">Additional Notes</label>
+                        <textarea name="notes" id="notes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm" placeholder="Any special instructions or requirements"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md text-sm font-medium transition-colors duration-300">
+                        <i class="fas fa-check mr-2"></i> Submit Shipment Details
+                    </button>
+                </form>
+            </div>
+            
+            <div class="mt-4 space-y-2">
                 <h3 class="text-sm font-medium text-gray-700">Suggested Questions</h3>
                 <div id="suggested-questions" class="space-y-2">
                     <button class="question-btn text-left w-full text-sm bg-gray-100 hover:bg-gray-200 p-2 rounded-md transition-colors">What's the weather like in London?</button>
@@ -240,6 +373,20 @@
             const userInput = document.getElementById('user-input');
             const chatHistory = document.getElementById('chat-history');
             const suggestedQuestions = document.querySelectorAll('.question-btn');
+            const shippingForm = document.getElementById('shipping-form');
+            const shippingFormContainer = document.getElementById('shipping-form-container');
+            const toggleShippingFormButton = document.getElementById('toggle-shipping-form');
+            const formButtonText = document.getElementById('form-button-text');
+            
+            // Toggle shipping form visibility
+            toggleShippingFormButton.addEventListener('click', function() {
+                shippingFormContainer.classList.toggle('open');
+                if (shippingFormContainer.classList.contains('open')) {
+                    formButtonText.textContent = 'Hide Shipment Details';
+                } else {
+                    formButtonText.textContent = 'Enter Shipment Details';
+                }
+            });
             
             // Map to track active agent for messages
             const agentTypes = {
@@ -250,6 +397,67 @@
             
             let currentAgent = 'triage';
             
+            // Handle shipping form submission
+            shippingForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Get all form data
+                const formData = new FormData(shippingForm);
+                const shipmentData = {};
+                
+                // Convert FormData to object
+                for (const [key, value] of formData.entries()) {
+                    shipmentData[key] = value;
+                }
+                
+                // Add special handling for checkboxes
+                const checkboxFields = ['hazardous', 'fragile', 'eco_friendly', 'insurance'];
+                checkboxFields.forEach(field => {
+                    shipmentData[field] = document.getElementById(field).checked;
+                });
+                
+                // Add user message to chat
+                const formattedInfo = `I need to ship ${shipmentData.cargo_type} from ${shipmentData.origin} to ${shipmentData.destination} using ${shipmentData.transport_method} transport. Weight: ${shipmentData.weight}kg, Volume: ${shipmentData.volume}m³, Priority: ${shipmentData.priority}, Delivery Deadline: ${shipmentData.deadline}`;
+                
+                addMessage('user', formattedInfo);
+                
+                // Show typing indicator
+                const typingIndicator = addTypingIndicator();
+                
+                // Send shipment data to server
+                try {
+                    const response = await fetch('/api/shipment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(shipmentData)
+                    });
+                    
+                    if (!response.ok) throw new Error('Error processing shipment details');
+                    
+                    const data = await response.json();
+                    
+                    // Remove typing indicator
+                    typingIndicator.remove();
+                    
+                    // Add agent response to chat
+                    addMessage('triage', data.response);
+                    
+                    // Reset form
+                    shippingForm.reset();
+                    
+                    // Collapse form
+                    shippingFormContainer.classList.remove('open');
+                    formButtonText.textContent = 'Enter Shipment Details';
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    typingIndicator.remove();
+                    addMessage('triage', 'I encountered an error processing your shipment details. Please try again or contact support.');
+                }
+            });
+            
             // Add event listeners to suggested questions
             suggestedQuestions.forEach(button => {
                 button.addEventListener('click', function() {
@@ -258,7 +466,7 @@
                 });
             });
             
-            // Handle form submission
+            // Handle chat form submission
             chatForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
