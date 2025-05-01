@@ -16,8 +16,18 @@ def register_agents(agent_registry):
     test_agent = BaseAgent("Test Agent")
     agent_registry[test_agent.name] = test_agent
     
-    # Now register our EcoSync Logistics agents
+    # Register the main EcoSync Logistics agents
     from ecosync_logistics_agent.agent_adapter import TriageAgentAdapter
+    from ecosync_logistics_agent.agent_adapter import ForecastingAgentAdapter
+    from ecosync_logistics_agent.agent_adapter import RoutingAgentAdapter
     
+    # Register the triage agent
     triage_agent = TriageAgentAdapter()
     agent_registry["EcoSync Logistics"] = triage_agent
+    
+    # Register specialized agents directly
+    forecasting_agent = ForecastingAgentAdapter()
+    agent_registry["Weather & Forecasting Agent"] = forecasting_agent
+    
+    routing_agent = RoutingAgentAdapter()
+    agent_registry["Routing & Traffic Agent"] = routing_agent

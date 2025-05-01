@@ -4,6 +4,10 @@ from agents import Agent, Runner, AsyncOpenAI, OpenAIChatCompletionsModel
 from agents.run import RunConfig
 from agents.mcp import MCPServerStdio
 from dotenv import load_dotenv, find_dotenv
+from datetime import datetime
+
+
+current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Import the agent creation functions
 from ecosync_logistics_agent.forecasting_agent import create_weather_agent
@@ -91,6 +95,7 @@ async def create_triage_agent():
         5.  Ask for Clarification:
             * If the query is unclear, ambiguous, or doesn't fit either category, politely request more specific information.
             * For example: "Could you please clarify whether you are asking about current weather/immediate needs, or travel-related disruptions/routes/deliveries?"
+            here is today's date and time: {current_date}
         """,
         model=model
     )
