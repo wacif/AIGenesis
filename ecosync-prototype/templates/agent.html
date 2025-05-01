@@ -122,10 +122,11 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-900">EcoSync Agent</p>
-                                    <p class="text-sm text-gray-700">Hello! I'm the EcoSync agent. You can ask me about:</p>
+                                    <p class="text-sm font-medium text-gray-900">Triage Agent</p>
+                                    <p class="text-sm text-gray-700">Hello! I'm the EcoSync Triage Agent. I'll analyze your questions and route them to the right specialized agent. You can ask me about:</p>
                                     <ul class="list-disc list-inside text-sm text-gray-700 mt-2">
                                         <li>Weather conditions in a specific city</li>
+                                        <li>Route planning between locations</li>
                                         <li>Strike or protest information for a specific date</li>
                                     </ul>
                                     <p class="text-sm text-gray-700 mt-2">How can I help you today?</p>
@@ -167,7 +168,29 @@
         </div>
     </div>
 
+    <!-- Debug Panel (Hidden by default) -->
+    <div id="debug-panel" class="fixed bottom-0 left-0 w-full bg-gray-900 text-white p-4 text-sm overflow-auto transition-all duration-300" style="height: 0px; opacity: 0;">
+        <div class="flex justify-between items-center mb-2">
+            <h3 class="font-bold">Agent Debug Panel</h3>
+            <button id="clear-debug" class="text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded">Clear</button>
+        </div>
+        <div id="debug-content" class="font-mono text-xs overflow-auto" style="height: calc(100% - 30px);"></div>
+    </div>
+
+    <!-- Debug Toggle Button -->
+    <button id="toggle-debug" class="fixed bottom-4 right-4 bg-gray-800 hover:bg-gray-700 text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg">
+        <i class="fas fa-bug"></i>
+    </button>
+
     <script>
+        // Agent colors for visual distinction
+        const agentColors = {
+            'Triage Agent': 'green',
+            'Weather Agent': 'blue',
+            'Routing Agent': 'purple',
+            'Strike Updates Agent': 'amber'
+        };
+        
         function showLoading() {
             document.getElementById('loading-indicator').classList.remove('hidden');
         }
@@ -198,16 +221,50 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
         
+        // Add a triage processing message to the chat
+        function addTriageMessage(message) {
+            const chatContainer = document.getElementById('chat-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message agent-message';
+            messageDiv.style.backgroundColor = '#f7fee7'; // Light green background
+            messageDiv.style.borderLeft = '4px solid #22c55e'; // Green left border
+            messageDiv.innerHTML = `
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 mr-3">
+                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-filter text-green-600"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Triage Agent</p>
+                        <p class="text-sm text-gray-700 italic">${message}</p>
+                    </div>
+                </div>
+            `;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
         // Add an agent message to the chat
         function addAgentMessage(message, agentName = "EcoSync Agent") {
             const chatContainer = document.getElementById('chat-container');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message agent-message';
+            
+            // Get the agent color or default to green
+            const color = agentColors[agentName] || 'green';
+            
+            // Choose icon based on agent type
+            let icon = 'fa-robot';
+            if (agentName === 'Weather Agent') icon = 'fa-cloud-sun';
+            if (agentName === 'Routing Agent') icon = 'fa-route';
+            if (agentName === 'Strike Updates Agent') icon = 'fa-bullhorn';
+            
             messageDiv.innerHTML = `
                 <div class="flex items-start">
                     <div class="flex-shrink-0 mr-3">
-                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                            <i class="fas fa-robot text-green-600"></i>
+                        <div class="w-8 h-8 rounded-full bg-${color}-100 flex items-center justify-center">
+                            <i class="fas ${icon} text-${color}-600"></i>
                         </div>
                     </div>
                     <div>
@@ -219,6 +276,32 @@
             chatContainer.appendChild(messageDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
+
+        // Enhancing the console.log to write to our debug panel
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        
+        console.log = function() {
+            // Call the original console.log
+            originalConsoleLog.apply(console, arguments);
+            
+            // Add to our debug panel if it's a debug message
+            const message = Array.from(arguments).join(' ');
+            if (message.includes('[DEBUG-UI]')) {
+                const timestamp = new Date().toISOString().split('T')[1].slice(0, -1);
+                logToDebugPanel(`${timestamp} ${message}`);
+            }
+        };
+        
+        console.error = function() {
+            // Call the original console.error
+            originalConsoleError.apply(console, arguments);
+            
+            // Add to our debug panel
+            const message = Array.from(arguments).join(' ');
+            const timestamp = new Date().toISOString().split('T')[1].slice(0, -1);
+            logToDebugPanel(`${timestamp} [ERROR] ${message}`);
+        };
         
         // Form submission
         document.getElementById('query-form').addEventListener('submit', function(e) {
@@ -234,6 +317,9 @@
             addUserMessage(query);
             showLoading();
             
+            // Debug: Log outgoing query
+            console.log("[DEBUG-UI] Sending query to server:", query);
+            
             fetch('/api/agent/query', {
                 method: 'POST',
                 headers: {
@@ -243,25 +329,55 @@
             })
             .then(response => {
                 if (!response.ok) {
+                    console.error("[DEBUG-UI] Server returned error status:", response.status);
                     throw new Error('Network response was not ok');
                 }
                 return response.json();
             })
             .then(data => {
+                // Debug: Log incoming response data
+                console.log("[DEBUG-UI] Received response from server:", data);
+                console.log("[DEBUG-UI] Agent:", data.agent);
+                console.log("[DEBUG-UI] Agent type:", data.agent_type);
+                console.log("[DEBUG-UI] Triage message:", data.triage_message);
+                
                 hideLoading();
-                addAgentMessage(data.response, data.agent);
+                
+                // First show the triage message if available
+                if (data.triage_message) {
+                    console.log("[DEBUG-UI] Displaying triage message");
+                    addTriageMessage(data.triage_message);
+                    
+                    // Add a slight delay before showing the specialized agent response
+                    setTimeout(() => {
+                        console.log("[DEBUG-UI] Displaying agent response after delay");
+                        addAgentMessage(data.response, data.agent);
+                    }, 500);
+                } else {
+                    console.log("[DEBUG-UI] No triage message, displaying agent response directly");
+                    addAgentMessage(data.response, data.agent);
+                }
+                
                 document.getElementById('query').value = '';
             })
             .catch(error => {
                 hideLoading();
-                console.error('Error:', error);
+                console.error('[DEBUG-UI] Error during fetch:', error);
                 addAgentMessage('Sorry, there was an error processing your request. Please try again later.');
             });
         });
         
+        // Add a route planning example button
+        const examplesContainer = document.querySelector('.flex.space-x-4');
+        const routeButton = document.createElement('button');
+        routeButton.id = 'route-example';
+        routeButton.className = 'bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition-colors duration-300';
+        routeButton.innerHTML = '<i class="fas fa-route mr-2"></i> Route Example';
+        examplesContainer.appendChild(routeButton);
+        
         // Example buttons
         document.getElementById('weather-example').addEventListener('click', function() {
-            const query = "What's the weather like in London today?";
+            const query = "What's the weather like in Lahore today?";
             document.getElementById('query').value = query;
         });
         
@@ -269,6 +385,38 @@
             const query = "Any strikes in Paris on May 1, 2025?";
             document.getElementById('query').value = query;
         });
+        
+        document.getElementById('route-example').addEventListener('click', function() {
+            const query = "What's the best route from Lahore to Islamabad?";
+            document.getElementById('query').value = query;
+        });
+
+        // Debug panel toggle
+        const debugPanel = document.getElementById('debug-panel');
+        const toggleDebugButton = document.getElementById('toggle-debug');
+        const debugContent = document.getElementById('debug-content');
+        const clearDebugButton = document.getElementById('clear-debug');
+
+        toggleDebugButton.addEventListener('click', () => {
+            if (debugPanel.style.height === '0px') {
+                debugPanel.style.height = '200px';
+                debugPanel.style.opacity = '1';
+            } else {
+                debugPanel.style.height = '0px';
+                debugPanel.style.opacity = '0';
+            }
+        });
+
+        clearDebugButton.addEventListener('click', () => {
+            debugContent.innerHTML = '';
+        });
+
+        function logToDebugPanel(message) {
+            const logEntry = document.createElement('div');
+            logEntry.textContent = message;
+            debugContent.appendChild(logEntry);
+            debugContent.scrollTop = debugContent.scrollHeight;
+        }
     </script>
 </body>
 </html>

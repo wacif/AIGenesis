@@ -3,13 +3,17 @@ from app import app
 import json
 import asyncio
 import os
-import time  # Added for timestamp generation
+import time  # Used for timestamp generation
 
-# Import agent modules
-from app.agents.weather_agent import run_weather_agent
-from app.agents.strike_agent import run_strike_agent
-from app.agents.triage_agent import run_triage_agent
-from app.agents.routing_agent import run_routing_agent
+# Import agent modules from new custom_agents directory
+from app.custom_agents.weather_agent import run_weather_agent
+from app.custom_agents.strike_agent import run_strike_agent
+from app.custom_agents.triage_agent import run_triage_agent
+from app.custom_agents.routing_agent import run_routing_agent
+
+# Import custom tools
+from app.custom_tools.route_tools import optimize_route, check_for_disruptions
+from app.custom_tools.weather_tools import get_current_weather, predict_demand_from_weather
 
 # Create a helper function to run async functions
 def run_async(coro):
@@ -22,41 +26,131 @@ def run_async(coro):
 
 @app.route('/api/forecast', methods=['GET'])
 def forecast():
-    # Mock response until we implement the agent
-    forecast_response = {
-        "product": "Heater",
-        "units_needed": 150,
-        "explanation": "Based on cold weather forecast and previous sales trends"
-    }
+    # Use our custom weather_tools functions instead of mock data
+    city = request.args.get('city', 'Lahore')
+    product = request.args.get('product', 'Heater')
+    
+    try:
+        prediction = predict_demand_from_weather(city, product)
+        forecast_response = {
+            "product": product,
+            "units_needed": prediction["predicted_demand"],
+            "explanation": prediction["explanation"],
+            "demand_level": prediction["demand_level"],
+            "city": city,
+            "weather": prediction["weather_condition"]
+        }
+    except Exception as e:
+        app.logger.error(f"Error in forecast: {str(e)}")
+        forecast_response = {
+            "product": product,
+            "units_needed": 150,
+            "explanation": "Based on estimated demand (fallback data)"
+        }
+    
     return jsonify(forecast_response)
 
 @app.route('/api/optimize', methods=['GET'])
 def optimize():
-    # Mock response until we implement the agent
-    route_response = {
-        "route_id": 2,
-        "explanation": "Selected greener route due to GreenSync Mode",
-        "emissions_kg": 15.0
-    }
+    # Use our custom route_tools functions instead of mock data
+    origin = request.args.get('origin', 'Lahore')
+    destination = request.args.get('destination', 'Islamabad')
+    eco_friendly = request.args.get('eco_friendly', 'true').lower() == 'true'
+    
+    try:
+        result = optimize_route(origin, destination, eco_friendly)
+        route_response = {
+            "route_id": int(time.time()),
+            "explanation": "Selected " + ("greener route due to eco-friendly option" if eco_friendly else "fastest route"),
+            "emissions_kg": result["emissions_kg"],
+            "emissions_saved_kg": result["emissions_saved_kg"],
+            "maps_url": result["maps_url"]
+        }
+    except Exception as e:
+        app.logger.error(f"Error in optimize: {str(e)}")
+        route_response = {
+            "route_id": int(time.time()),
+            "explanation": "Selected route based on default parameters",
+            "emissions_kg": 15.0,
+            "emissions_saved": 0.0
+        }
+    
     return jsonify(route_response)
 
 @app.route('/api/dashboard', methods=['GET'])
 def dashboard():
-    # Mock response until we implement the agent
+    # Use data from our route optimization tools
+    try:
+        # Get the most recent route from saved data
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+        routes_file = os.path.join(data_dir, "routes.json")
+        
+        if os.path.exists(routes_file):
+            with open(routes_file, "r") as f:
+                routes = json.load(f)
+                
+            if routes:
+                latest_route = routes[-1]
+                emissions_saved = latest_route.get("emissions_saved_kg", 0)
+                
+                # Calculate points - 1 point per kg of CO2 saved
+                points = round(emissions_saved)
+                
+                dashboard_response = {
+                    "text": "Your shipment is on an optimized route",
+                    "story": f"This route choice saved the equivalent of {max(1, round(emissions_saved/3))} trees!",
+                    "points": points,
+                    "leaderboard": [
+                        {"driver": "Alice", "points": 50},
+                        {"driver": "Bob", "points": 40},
+                        {"driver": "You", "points": points}
+                    ]
+                }
+                return jsonify(dashboard_response)
+    except Exception as e:
+        app.logger.error(f"Error loading dashboard data: {str(e)}")
+    
+    # Fallback response
     dashboard_response = {
         "text": "Your shipment is on an optimized green route",
         "story": "This route choice saved the equivalent of 5 trees!",
         "points": 7,
         "leaderboard": [
             {"driver": "Alice", "points": 50},
-            {"driver": "Bob", "points": 40}
+            {"driver": "Bob", "points": 40},
+            {"driver": "You", "points": 7}
         ]
     }
     return jsonify(dashboard_response)
 
 @app.route('/api/reward', methods=['GET'])
 def reward():
-    # Mock response until we implement the agent
+    # Calculate reward based on emissions saved
+    try:
+        # Get the most recent route from saved data
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+        routes_file = os.path.join(data_dir, "routes.json")
+        
+        if os.path.exists(routes_file):
+            with open(routes_file, "r") as f:
+                routes = json.load(f)
+                
+            if routes:
+                latest_route = routes[-1]
+                emissions_saved = latest_route.get("emissions_saved_kg", 0)
+                
+                # Calculate points - 1 point per kg of CO2 saved
+                points = round(emissions_saved)
+                
+                reward_response = {
+                    "points": points,
+                    "message": f"Earned {points} points for saving {emissions_saved:.1f} kg CO2"
+                }
+                return jsonify(reward_response)
+    except Exception as e:
+        app.logger.error(f"Error calculating reward: {str(e)}")
+    
+    # Fallback response
     reward_response = {
         "points": 7,
         "message": "Earned 7 points for saving 15 kg CO2"
@@ -65,14 +159,35 @@ def reward():
 
 @app.route('/api/disrupt', methods=['POST'])
 def disrupt():
-    with open('data/traffic.json', 'w') as f:
-        json.dump({"route_id": 1, "delay_min": 30}, f)
-    return jsonify({"status": "Traffic jam added"})
+    data = request.json or {}
+    route_id = data.get("route_id", 1)
+    delay_min = data.get("delay_min", 30)
+    reason = data.get("reason", "Traffic jam")
+    
+    traffic_data = {
+        "route_id": route_id,
+        "delay_min": delay_min,
+        "reason": reason,
+        "timestamp": time.time()
+    }
+    
+    # Save disruption data
+    try:
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+        traffic_file = os.path.join(data_dir, "traffic.json")
+        
+        with open(traffic_file, 'w') as f:
+            json.dump(traffic_data, f, indent=2)
+    except Exception as e:
+        app.logger.error(f"Error saving traffic data: {str(e)}")
+    
+    return jsonify({"status": f"{reason} added with {delay_min} minute delay"})
 
 @app.route('/api/agent/query', methods=['POST'])
 def agent_query():
     """
     Process a user query through the triage agent and route to the appropriate specialized agent.
+    Shows the complete agent interaction process from triage to specialized response.
     """
     data = request.json
     if not data or 'query' not in data:
@@ -80,31 +195,52 @@ def agent_query():
     
     query = data['query']
     
+    # Terminal logging with print statements
+    print("\n" + "="*80)
+    print(f"🔍 RECEIVED USER QUERY: '{query}'")
+    print("="*80)
+    
     try:
         # First, use the triage agent to determine which specialized agent to use
+        print(f"⏳ Sending query to triage agent: '{query}'")
         agent_type, triage_message = run_async(run_triage_agent(query))
+        print(f"✅ TRIAGE RESULT: agent_type='{agent_type}', message='{triage_message}'")
         
         # Based on the triage result, route to the appropriate agent
         if agent_type == 'weather':
+            print(f"🌤️  Routing to WEATHER AGENT: '{query}'")
             response = run_async(run_weather_agent(query))
             agent_name = "Weather Agent"
         elif agent_type == 'routing':
+            print(f"🛣️  Routing to ROUTING AGENT: '{query}'")
             response = run_async(run_routing_agent(query))
             agent_name = "Routing Agent"
         elif agent_type == 'strike':
+            print(f"🪧  Routing to STRIKE AGENT: '{query}'")
             response = run_async(run_strike_agent(query))
             agent_name = "Strike Updates Agent"
         else:
+            print(f"❓ Could not determine specialized agent, using Triage Agent")
             response = "I'm not sure how to process your query. Could you please clarify what information you're looking for? You can ask about weather conditions in a specific city, routes between locations, or about strikes/protests on a specific date."
             agent_name = "Triage Agent"
         
-        return jsonify({
+        print(f"📤 AGENT RESPONSE FROM {agent_name}: '{response[:100]}...'")
+        
+        result = {
             "response": response,
             "agent": agent_name,
-            "triage_message": triage_message
-        })
+            "agent_type": agent_type,
+            "triage_message": triage_message,
+            "query_processed": True,
+            "timestamp": time.time()
+        }
+        
+        print("✅ Returning response to client")
+        print("="*80 + "\n")
+        return jsonify(result)
     except Exception as e:
-        app.logger.error(f"Error in agent query: {str(e)}")
+        print(f"❌ ERROR in agent query: {str(e)}")
+        print("="*80 + "\n")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/agent/weather', methods=['POST'])
@@ -235,18 +371,36 @@ def process_shipment():
             f"Find optimal route from {origin} to {destination} for {transport_method} transport with {special_requirements}"
         ))
         
+        # Check for disruptions using our custom tools
+        disruptions = check_for_disruptions(origin, destination)
+        
         # Store shipment data in a JSON file for future reference
         try:
-            with open('data/shipment.json', 'w') as f:
+            # Ensure data directory exists
+            data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+            os.makedirs(data_dir, exist_ok=True)
+            
+            # Add timestamp and save
+            data['timestamp'] = time.time()
+            data['shipment_id'] = f"SH-{int(time.time())}"
+            
+            with open(os.path.join(data_dir, 'shipment.json'), 'w') as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
             app.logger.error(f"Error saving shipment data: {str(e)}")
         
+        # Check if we have any disruptions to report
+        disruption_message = ""
+        if disruptions:
+            disruption_message = "\n\nPotential disruptions detected:\n"
+            for i, d in enumerate(disruptions, 1):
+                disruption_message += f"{i}. {d['type'].upper()} at {d['location']}: {d['description']} (Est. delay: {d['delay_minutes']} minutes)\n"
+        
         # Build a comprehensive response with the routing information
         response = {
-            "response": routing_response,
+            "response": routing_response + disruption_message,
             "agent_type": "routing",
-            "shipment_id": f"SH-{int(time.time())}", # Generate a unique shipment ID
+            "shipment_id": f"SH-{int(time.time())}",  # Generate a unique shipment ID
             "status": "Processing",
             "message": f"Your shipment from {origin} to {destination} has been received and is being optimized."
         }
@@ -280,11 +434,24 @@ def route_planning():
     
     # Additional parameters that might be passed
     transport_method = data.get('transport_method', '')
+    eco_friendly = data.get('eco_friendly', False)
+    
     special_requirements = []
-    if data.get('eco_friendly'):
+    if eco_friendly:
         special_requirements.append('eco-friendly')
     if data.get('hazardous'):
         special_requirements.append('hazardous materials')
+    
+    # Optimize the route using our custom tools
+    try:
+        route_data = optimize_route(origin, destination, eco_friendly)
+        disruptions = check_for_disruptions(origin, destination)
+    except Exception as e:
+        app.logger.error(f"Error optimizing route: {str(e)}")
+        route_data = {
+            "maps_url": f"https://www.google.com/maps/dir/?api=1&origin={origin.replace(' ', '+')}&destination={destination.replace(' ', '+')}"
+        }
+        disruptions = []
     
     # Construct the query for the routing agent
     query = f"I want to go from {origin} to {destination}"
@@ -302,7 +469,9 @@ def route_planning():
             "origin": origin,
             "destination": destination,
             "request_id": f"ROUTE-{int(time.time())}",
-            "status": "success"
+            "map_url": route_data.get("maps_url", ""),
+            "status": "success",
+            "disruptions": disruptions
         })
     except Exception as e:
         app.logger.error(f"Error in route processing: {str(e)}")

@@ -2,17 +2,9 @@
 Strike Agent for EcoSync
 This module implements a strike information agent that provides updates on strikes and protests.
 """
-import os
-import asyncio
-from agents import Agent, Runner, AsyncOpenAI, OpenAIChatCompletionsModel, function_tool, set_tracing_disabled
-set_tracing_disabled(True)
-from agents.run import RunConfig
 from datetime import datetime
-from dotenv import load_dotenv, find_dotenv
-
-load_dotenv(find_dotenv())
-
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+from agents import Agent, function_tool
+from app.custom_agents.base_agent import get_client_and_model, run_agent_with_query
 
 @function_tool
 def get_strike_info(location: str, date: str = None) -> str:
@@ -26,7 +18,7 @@ def get_strike_info(location: str, date: str = None) -> str:
     Returns:
         A string containing information about any strikes or protests
     """
-    # This is a mock implementation that returns fake data
+    # Use the current date if none provided
     if not date:
         date = datetime.now().strftime("%Y-%m-%d")
     
@@ -41,6 +33,9 @@ def get_strike_info(location: str, date: str = None) -> str:
         },
         "new york": {
             "2025-05-15": "Taxi drivers protest in downtown Manhattan. Increased traffic congestion expected."
+        },
+        "lahore": {
+            "2025-05-01": "Transport workers strike affecting major routes. Consider alternative transportation."
         }
     }
     
@@ -63,23 +58,16 @@ async def create_strike_agent():
     Returns:
         An Agent instance configured for strike information
     """
-    if not GEMINI_API_KEY:
-        raise ValueError("GEMINI_API_KEY environment variable is not set")
+    client, model = get_client_and_model()
     
-    client = AsyncOpenAI(
-        api_key=GEMINI_API_KEY,
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-    )
-    
-    model = OpenAIChatCompletionsModel(
-        model="gemini-2.0-flash",
-        openai_client=client
-    )
+    if not client or not model:
+        return None
     
     agent = Agent(
-        name="Strike_Agent",
+        name="StrikeAgent",
         instructions="""
-        You are a Strike Information Agent providing up-to-date information about strikes, protests, and other events that might disrupt transportation and logistics.
+        You are a Strike Information Agent providing up-to-date information about strikes, protests, 
+        and other events that might disrupt transportation and logistics.
         
         When a user asks about strikes or protests:
         1. Extract the specific location (city or country) from the query
@@ -90,14 +78,9 @@ async def create_strike_agent():
            - Strike/protest status (ongoing, scheduled, none reported)
            - Expected impact on transportation and logistics
            - Alternative suggestions if available
-           - Source of the information (note that this is mock data for the prototype)
         6. Maintain a helpful, informative tone throughout
-        
-        Example query: "Are there any strikes in Paris on May 1, 2025?"
-        Example response: "I've checked for strikes in Paris on May 1, 2025. There is a large transportation strike affecting metro and bus services. You should expect significant delays. Alternative options include using taxis, ride-sharing services, or walking for shorter distances."
         """,
-        tools=[get_strike_info],
-        model=model
+        tools=[get_strike_info]
     )
     return agent
 
@@ -111,38 +94,9 @@ async def run_strike_agent(query: str):
     Returns:
         The agent's response to the query
     """
-    if not GEMINI_API_KEY:
-        return "Strike agent is not available. Please check your API key configuration."
+    strike_agent = await create_strike_agent()
+    if not strike_agent:
+        return "Strike agent could not be initialized. Please check your API key configuration."
     
-    config = RunConfig(
-        model=None,  # Will be set in the agent
-        tracing_disabled=True,
-    )
-    
-    try:
-        strike_agent = await create_strike_agent()
-        result = await Runner.run(
-            strike_agent,
-            query,
-            run_config=config
-        )
-        
-        return result.final_output
-    except Exception as e:
-        return f"Error processing strike information request: {str(e)}"
-
-# Initialize the agent on module load
-try:
-    agent = asyncio.get_event_loop().run_until_complete(create_strike_agent())
-except Exception as e:
-    print(f"Error initializing strike agent: {str(e)}")
-    agent = None
-
-async def main():
-    """Simple CLI for testing the agent directly"""
-    user_query = input("Enter your strike information request (e.g., Any strikes in Paris on May 1, 2025?): ")
-    result = await run_strike_agent(user_query)
-    print(f"\n\nFinal response:\n{result}")
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    formatted_query = f"Strike information request: {query}"
+    return await run_agent_with_query(strike_agent, formatted_query)
