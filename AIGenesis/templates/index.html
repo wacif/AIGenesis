@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIGenesis - Multi-Agent Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <h1>AIGenesis Chat</h1>
+            <div class="agent-selector">
+                <label for="agent-select">Select Agent:</label>
+                <select id="agent-select">
+                    {% for agent in agents %}
+                    <option value="{{ agent }}">{{ agent }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="chat-messages" id="chat-messages">
+            <div class="message system">
+                <div class="message-content">
+                    Welcome to AIGenesis! Choose an agent and start chatting.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <form id="chat-form">
+                <input type="text" id="user-message" placeholder="Type your message here..." autocomplete="off">
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>
