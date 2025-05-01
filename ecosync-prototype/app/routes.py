@@ -195,36 +195,36 @@ def agent_query():
     
     query = data['query']
     
-    # Terminal logging with print statements
-    print("\n" + "="*80)
-    print(f"🔍 RECEIVED USER QUERY: '{query}'")
-    print("="*80)
+    # Terminal logging with print statements - using flush=True to ensure immediate output
+    print("\n" + "="*80, flush=True)
+    print(f"🔍 RECEIVED USER QUERY: '{query}'", flush=True)
+    print("="*80, flush=True)
     
     try:
         # First, use the triage agent to determine which specialized agent to use
-        print(f"⏳ Sending query to triage agent: '{query}'")
+        print(f"⏳ Sending query to triage agent: '{query}'", flush=True)
         agent_type, triage_message = run_async(run_triage_agent(query))
-        print(f"✅ TRIAGE RESULT: agent_type='{agent_type}', message='{triage_message}'")
+        print(f"✅ TRIAGE RESULT: agent_type='{agent_type}', message='{triage_message}'", flush=True)
         
         # Based on the triage result, route to the appropriate agent
         if agent_type == 'weather':
-            print(f"🌤️  Routing to WEATHER AGENT: '{query}'")
+            print(f"🌤️  Routing to WEATHER AGENT: '{query}'", flush=True)
             response = run_async(run_weather_agent(query))
             agent_name = "Weather Agent"
         elif agent_type == 'routing':
-            print(f"🛣️  Routing to ROUTING AGENT: '{query}'")
+            print(f"🛣️  Routing to ROUTING AGENT: '{query}'", flush=True)
             response = run_async(run_routing_agent(query))
             agent_name = "Routing Agent"
         elif agent_type == 'strike':
-            print(f"🪧  Routing to STRIKE AGENT: '{query}'")
+            print(f"🪧  Routing to STRIKE AGENT: '{query}'", flush=True)
             response = run_async(run_strike_agent(query))
             agent_name = "Strike Updates Agent"
         else:
-            print(f"❓ Could not determine specialized agent, using Triage Agent")
+            print(f"❓ Could not determine specialized agent, using Triage Agent", flush=True)
             response = "I'm not sure how to process your query. Could you please clarify what information you're looking for? You can ask about weather conditions in a specific city, routes between locations, or about strikes/protests on a specific date."
             agent_name = "Triage Agent"
         
-        print(f"📤 AGENT RESPONSE FROM {agent_name}: '{response[:100]}...'")
+        print(f"📤 AGENT RESPONSE FROM {agent_name}: '{response[:100]}...'", flush=True)
         
         result = {
             "response": response,
@@ -235,12 +235,12 @@ def agent_query():
             "timestamp": time.time()
         }
         
-        print("✅ Returning response to client")
-        print("="*80 + "\n")
+        print("✅ Returning response to client", flush=True)
+        print("="*80 + "\n", flush=True)
         return jsonify(result)
     except Exception as e:
-        print(f"❌ ERROR in agent query: {str(e)}")
-        print("="*80 + "\n")
+        print(f"❌ ERROR in agent query: {str(e)}", flush=True)
+        print("="*80 + "\n", flush=True)
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/agent/weather', methods=['POST'])
